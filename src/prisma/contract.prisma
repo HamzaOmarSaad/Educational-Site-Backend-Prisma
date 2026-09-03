@@ -1,0 +1,600 @@
+// use prisma-next
+
+// ============================================================
+// ENUMS
+// ============================================================
+enum UserRole {
+  @@type("pg/text@1")
+
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum CourseStatus {
+  @@type("pg/text@1")
+
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  @@type("pg/text@1")
+
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum LessonProgressStatus {
+  @@type("pg/text@1")
+
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum QuestionType {
+  @@type("pg/text@1")
+
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  TEXT
+}
+
+enum ContentType {
+  @@type("pg/text@1")
+
+  VIDEO
+  PDF
+  DOCUMENT
+  IMAGE
+  OTHER
+}
+
+enum VoucherStatus {
+  @@type("pg/text@1")
+
+  ACTIVE
+  USED
+  EXPIRED
+  CANCELLED
+}
+
+enum WalletTransactionType {
+  @@type("pg/text@1")
+
+  VOUCHER_RECHARGE
+  COURSE_PURCHASE
+  REFUND
+  ADJUSTMENT
+}
+
+// ============================================================
+// USER
+// ============================================================
+model User {
+  id               Uuid             @id @default(uuid())
+  name             String
+  email            String           @unique
+  password         String
+  role             UserRole
+
+  phone            String?
+  avatarUrl        String?
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime?
+
+  // Profiles
+  teacherProfile   TeacherProfile?
+  studentProfile   StudentProfile?
+
+  // Teacher relationships
+  courses          Course[]
+
+  // Student relationships
+  enrollments      Enrollment[]
+  progress         LessonProgress[]
+  quizAttempts     QuizAttempt[]
+
+  wallet           Wallet?
+
+  vouchersCreated  Voucher[]        @relation("TeacherVouchers")
+  vouchersRedeemed Voucher[]        @relation("VoucherRedemption")
+
+  @@index([role])
+}
+
+// ============================================================
+// TEACHER PROFILE
+// ============================================================
+model TeacherProfile {
+  id             Uuid      @id @default(uuid())
+  userId         Uuid      @unique
+
+  bio            String?
+  specialization String?
+  experience     Int?
+  qualifications String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime?
+
+  user           User      @relation(fields:[userId], references:[id], onDelete: Cascade)
+}
+
+// ============================================================
+// STUDENT PROFILE
+// ============================================================
+model StudentProfile {
+  id             Uuid          @id @default(uuid())
+  userId         Uuid          @unique
+
+  school         String?
+  gradeId        Uuid
+  academicYearId Uuid?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime?
+
+  user           User          @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  grade          Grade         @relation(fields:[gradeId], references:[id])
+
+  academicYear   AcademicYear? @relation(fields:[academicYearId], references:[id])
+
+  @@index([gradeId])
+  @@index([academicYearId])
+}
+
+// ============================================================
+// GRADE
+// ============================================================
+model Grade {
+  id            Uuid             @id @default(uuid())
+  name          String
+  description   String?
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime?
+
+  students      StudentProfile[]
+  courses       Course[]
+
+  academicYears AcademicYear[]
+
+  @@unique([name])
+}
+
+// ============================================================
+// ACADEMIC YEAR
+// ============================================================
+model AcademicYear {
+  id        Uuid             @id @default(uuid())
+  gradeId   Uuid
+
+  name      String
+  year      Int
+
+  createdAt DateTime         @default(now())
+
+  grade     Grade            @relation(fields:[gradeId], references:[id], onDelete: Cascade)
+
+  students  StudentProfile[]
+
+  subjects  Subject[]
+
+  @@unique([gradeId, year])
+  @@index([gradeId])
+}
+
+// ============================================================
+// SUBJECT
+// ============================================================
+model Subject {
+  id             Uuid         @id @default(uuid())
+  academicYearId Uuid
+
+  name           String
+  description    String?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+
+  academicYear   AcademicYear @relation(fields:[academicYearId], references:[id], onDelete: Cascade)
+
+  courses        Course[]
+
+  @@unique([academicYearId, name])
+  @@index([academicYearId])
+}
+
+// ============================================================
+// COURSE
+// ============================================================
+model Course {
+  id           Uuid            @id @default(uuid())
+
+  teacherId    Uuid
+  gradeId      Uuid
+  subjectId    Uuid
+
+  title        String
+  description  String?
+  thumbnailUrl String?
+
+  price        Decimal
+
+  status       CourseStatus    @default(DRAFT)
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime?
+
+  teacher      User            @relation(fields:[teacherId], references:[id])
+
+  grade        Grade           @relation(fields:[gradeId], references:[id])
+
+  subject      Subject         @relation(fields:[subjectId], references:[id])
+
+  sections     CourseSection[]
+
+  enrollments  Enrollment[]
+
+  @@index([teacherId])
+  @@index([gradeId])
+  @@index([subjectId])
+  @@index([status])
+}
+
+// ============================================================
+// COURSE SECTION
+// ============================================================
+model CourseSection {
+  id          Uuid      @id @default(uuid())
+
+  courseId    Uuid
+
+  title       String
+  description String?
+  order       Int
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+
+  course      Course    @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  lessons     Lesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+// ============================================================
+// LESSON
+// ============================================================
+model Lesson {
+  id          Uuid               @id @default(uuid())
+
+  sectionId   Uuid
+
+  title       String
+  description String?
+  content     String?
+
+  order       Int
+  isFree      Boolean            @default(false)
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime?
+
+  section     CourseSection      @relation(fields:[sectionId], references:[id], onDelete: Cascade)
+
+  video       LessonVideo?
+  attachments LessonAttachment[]
+
+  progress    LessonProgress[]
+
+  quizzes     Quiz[]
+
+  @@unique([sectionId, order])
+  @@index([sectionId])
+}
+
+// ============================================================
+// LESSON VIDEO
+// ============================================================
+model LessonVideo {
+  id        Uuid      @id @default(uuid())
+  lessonId  Uuid      @unique
+
+  url       String
+  duration  Int?
+  provider  String?
+  videoKey  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  lesson    Lesson    @relation(fields:[lessonId], references:[id], onDelete: Cascade)
+}
+
+// ============================================================
+// LESSON ATTACHMENT
+// ============================================================
+model LessonAttachment {
+  id        Uuid        @id @default(uuid())
+  lessonId  Uuid
+
+  name      String
+  url       String
+  key       String?
+  type      ContentType
+  size      Int?
+
+  createdAt DateTime    @default(now())
+
+  lesson    Lesson      @relation(fields:[lessonId], references:[id], onDelete: Cascade)
+
+  @@index([lessonId])
+}
+
+// ============================================================
+// ENROLLMENT
+// ============================================================
+model Enrollment {
+  id          Uuid             @id @default(uuid())
+
+  studentId   Uuid
+  courseId    Uuid
+
+  status      EnrollmentStatus @default(ACTIVE)
+
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+
+  student     User             @relation(fields:[studentId], references:[id], onDelete: Cascade)
+
+  course      Course           @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+}
+
+// ============================================================
+// LESSON PROGRESS
+// ============================================================
+model LessonProgress {
+  id             Uuid                 @id @default(uuid())
+
+  studentId      Uuid
+  lessonId       Uuid
+
+  status         LessonProgressStatus @default(NOT_STARTED)
+  progress       Int                  @default(0)
+
+  watchedSeconds Int                  @default(0)
+
+  completedAt    DateTime?
+  updatedAt      DateTime?
+
+  student        User                 @relation(fields:[studentId], references:[id], onDelete: Cascade)
+
+  lesson         Lesson               @relation(fields:[lessonId], references:[id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+  @@index([studentId])
+  @@index([lessonId])
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+model Quiz {
+  id           Uuid           @id @default(uuid())
+  lessonId     Uuid
+
+  title        String
+  description  String?
+
+  passingScore Int?
+
+  timeLimit    Int?
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime?
+
+  lesson       Lesson         @relation(fields:[lessonId], references:[id], onDelete: Cascade)
+
+  questions    QuizQuestion[]
+
+  attempts     QuizAttempt[]
+
+  @@index([lessonId])
+}
+
+// ============================================================
+// QUIZ QUESTION
+// ============================================================
+model QuizQuestion {
+  id        Uuid         @id @default(uuid())
+  quizId    Uuid
+
+  question  String
+  type      QuestionType
+
+  points    Int          @default(1)
+
+  order     Int
+
+  createdAt DateTime     @default(now())
+
+  quiz      Quiz         @relation(fields:[quizId], references:[id], onDelete: Cascade)
+
+  answers   Answer[]
+
+  @@unique([quizId, order])
+  @@index([quizId])
+}
+
+// ============================================================
+// ANSWER / CHOICE
+// ============================================================
+model Answer {
+  id         Uuid         @id @default(uuid())
+  questionId Uuid
+
+  text       String
+  isCorrect  Boolean      @default(false)
+
+  order      Int
+
+  question   QuizQuestion @relation(fields:[questionId], references:[id], onDelete: Cascade)
+
+  @@unique([questionId, order])
+  @@index([questionId])
+}
+
+// ============================================================
+// QUIZ ATTEMPT
+// ============================================================
+model QuizAttempt {
+  id          Uuid         @id @default(uuid())
+
+  studentId   Uuid
+  quizId      Uuid
+
+  score       Decimal?
+  percentage  Decimal?
+
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+
+  student     User         @relation(fields:[studentId], references:[id], onDelete: Cascade)
+
+  quiz        Quiz         @relation(fields:[quizId], references:[id], onDelete: Cascade)
+
+  answers     QuizAnswer[]
+
+  @@index([studentId])
+  @@index([quizId])
+}
+
+// ============================================================
+// QUIZ ANSWER
+// ============================================================
+model QuizAnswer {
+  id         Uuid         @id @default(uuid())
+
+  attemptId  Uuid
+  questionId Uuid
+  answerId   Uuid?
+
+  textAnswer String?
+
+  isCorrect  Boolean?
+  points     Decimal?
+
+  attempt    QuizAttempt  @relation(fields:[attemptId], references:[id], onDelete: Cascade)
+
+  question   QuizQuestion @relation(fields:[questionId], references:[id])
+
+  answer     Answer?      @relation(fields:[answerId], references:[id])
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([answerId])
+}
+
+// ============================================================
+model Wallet {
+  id              Uuid                   @id @default(uuid())
+
+  studentId       Uuid                   @unique
+
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime?
+
+  student         User                   @relation(fields:[studentId], references:[id], onDelete: Cascade)
+
+  teacherBalances TeacherWalletBalance[]
+}
+
+model TeacherWalletBalance {
+  id           Uuid                @id @default(uuid())
+
+  walletId     Uuid
+  teacherId    Uuid
+
+  balance      Decimal             @default("0")
+
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime?
+
+  wallet       Wallet              @relation(fields:[walletId], references:[id], onDelete: Cascade)
+
+  teacher      User                @relation(fields:[teacherId], references:[id])
+
+  transactions WalletTransaction[]
+
+  @@unique([walletId, teacherId])
+  @@index([teacherId])
+}
+
+model Voucher {
+  id           Uuid               @id @default(uuid())
+
+  code         String             @unique
+
+  amount       Decimal
+
+  teacherId    Uuid
+
+  status       VoucherStatus      @default(ACTIVE)
+
+  expiresAt    DateTime?
+
+  redeemedAt   DateTime?
+  redeemedById Uuid?
+
+  createdAt    DateTime           @default(now())
+
+  teacher      User               @relation("TeacherVouchers", fields:[teacherId], references:[id])
+
+  redeemedBy   User?              @relation("VoucherRedemption", fields:[redeemedById], references:[id])
+
+  transaction  WalletTransaction?
+
+  @@index([teacherId])
+  @@index([status])
+}
+
+model WalletTransaction {
+  id                     Uuid                  @id @default(uuid())
+
+  teacherWalletBalanceId Uuid
+
+  type                   WalletTransactionType
+
+  amount                 Decimal
+
+  balanceBefore          Decimal
+  balanceAfter           Decimal
+
+  voucherId              Uuid?                 @unique
+
+  description            String?
+
+  createdAt              DateTime              @default(now())
+
+  teacherWalletBalance   TeacherWalletBalance  @relation(fields:[teacherWalletBalanceId], references:[id], onDelete: Cascade)
+
+  voucher                Voucher?              @relation(fields:[voucherId], references:[id])
+
+  @@index([teacherWalletBalanceId])
+  @@index([voucherId])
+  @@index([type])
+}

@@ -1,1 +1,0 @@
-# Educational-Site-Backend-Prisma
