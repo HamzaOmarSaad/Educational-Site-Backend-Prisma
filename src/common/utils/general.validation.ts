@@ -1,10 +1,7 @@
-import { Types } from "mongoose";
 import { z } from "zod";
 
 export const generalValidationFields = {
-  id: z.string().refine((val) => {
-    return Types.ObjectId.isValid(val);
-  }, "invalid object id "),
+  id: z.string(),
   email: z.email(),
   phone: z
     .string({ error: "wrong phone number" })

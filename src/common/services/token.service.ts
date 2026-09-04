@@ -1,6 +1,4 @@
 import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
-import { userRepository } from "../../DB/repos/user.repo";
-import { RoleEnum } from "../../Enums";
 import {
   ACCESS_EXPIRES_IN,
   REFRESH_EXPIRES_IN,
@@ -10,8 +8,9 @@ import {
   USER_JWT_SECRET,
 } from "../../env/config";
 import redisService from "./redis.service";
-import { badRequestException } from "../res/exceptions/domain.exceptions";
-import { HUser } from "../../interfaces";
+import { badRequestException } from "../res";
+import { UserRole } from "../../interfaces";
+import { userModel } from "../../prisma/db";
 
 export const tokenTypeEnum = {
   access: "access",
@@ -23,8 +22,8 @@ export type TokenType = keyof typeof tokenTypeEnum;
 type TokenInputType = {
   payload: object;
   options?: SignOptions;
-  tokenType: TokenType;
-  secret: string;
+  tokenType?: TokenType;
+  secret?: string;
 };
 type TokenVerifyType = {
   token: string;
@@ -34,10 +33,8 @@ type TokenVerifyType = {
 
 export class TokenService {
   private redisService;
-  private userRepo;
   constructor() {
     this.redisService = redisService;
-    this.userRepo = userRepository;
   }
   public sign({
     payload,
@@ -52,10 +49,10 @@ export class TokenService {
     token,
     tokenType = tokenTypeEnum.access,
     secret = USER_JWT_SECRET,
-  }: TokenVerifyType) => {
+  }: TokenVerifyType): jwt.JwtPayload => {
     try {
       if (tokenType === "access" || tokenType === "refresh") {
-        return jwt.verify(token, secret);
+        return jwt.verify(token, secret) as jwt.JwtPayload;
       }
 
       throw new badRequestException("Invalid token type");
@@ -65,15 +62,15 @@ export class TokenService {
       );
     }
   };
-  public getSignature = (role: RoleEnum, tokenType: TokenType): string => {
-    if (role == RoleEnum.admin) {
+  public getSignature = (role: UserRole, tokenType: TokenType): string => {
+    if (role == UserRole.ADMIN) {
       if (tokenType == tokenTypeEnum.access) {
         return SYSTEM_JWT_SECRET;
       } else {
         return SYSTEM_JWT_REFRESH_SECRET;
       }
     }
-    if (role == RoleEnum.user) {
+    if (role == UserRole.STUDENT || role == UserRole.TEACHER) {
       if (tokenType == tokenTypeEnum.access) {
         return USER_JWT_SECRET;
       } else {
@@ -82,14 +79,16 @@ export class TokenService {
     }
     return "";
   };
-  public createLoginTokens = ({ iss, user }: { iss: string; user: HUser }) => {
+
+  public createLoginTokens = ({ iss, user }: { iss: string; user: any }) => {
     const jwtId = crypto.randomUUID();
-    const signature = this.getSignature(user.role, tokenTypeEnum.access);
+    const accessSecret = this.getSignature(user.role, tokenTypeEnum.access);
+    const refreshSecret = this.getSignature(user.role, tokenTypeEnum.refresh);
 
     const accessToken = this.sign({
-      payload: { sub: user._id },
+      payload: { sub: user.id },
       tokenType: tokenTypeEnum.access,
-      secret: signature,
+      secret: accessSecret,
 
       options: {
         expiresIn: ACCESS_EXPIRES_IN,
@@ -99,9 +98,9 @@ export class TokenService {
       },
     });
     const refreshToken = this.sign({
-      payload: { _id: user._id },
+      payload: { sub: user.id },
       tokenType: tokenTypeEnum.refresh,
-      secret: signature,
+      secret: refreshSecret,
 
       options: {
         expiresIn: REFRESH_EXPIRES_IN,
@@ -119,13 +118,15 @@ export class TokenService {
   }: {
     token: string;
     tokenType: TokenType;
-  }): Promise<{ user: HUser; decoded: JwtPayload }> => {
+  }): Promise<{ user: any; decoded: JwtPayload }> => {
     const decoded = jwt.decode(token) as JwtPayload;
     if (!decoded?.aud?.length) {
       throw new badRequestException("missing token audience ");
     }
-    const [tokenApproach, signatureLevel] = decoded.aud;
-    if (tokenApproach == undefined || signatureLevel == undefined) {
+    const audience = Array.isArray(decoded.aud) ? decoded.aud : [decoded.aud];
+    const [tokenApproach, role] = audience;
+
+    if (!tokenApproach || !role) {
       throw new badRequestException("missing token audience ");
     }
     if (tokenApproach != tokenType) {
@@ -133,7 +134,7 @@ export class TokenService {
     }
     const isBanned = await this.redisService.getValue(
       this.redisService.revokeTokenGenerator({
-        userId: decoded._id,
+        userId: decoded.sub as string,
         jti: decoded.jti as string,
       }),
     );
@@ -143,14 +144,14 @@ export class TokenService {
     }
 
     const secret = this.getSignature(
-      signatureLevel as unknown as RoleEnum,
+      role as unknown as UserRole,
       tokenApproach,
     );
     const verifiedData = this.verify({ token, secret, tokenType });
 
-    const user = await this.userRepo.findOne({
-      _id: verifiedData.sub,
-    });
+    const user = await userModel
+      .where({ id: verifiedData.sub as string })
+      .first();
 
     if (!user) {
       throw new badRequestException("No user with these credentials ");
@@ -158,16 +159,15 @@ export class TokenService {
 
     if (
       user.changedCredentialsTime &&
-      decoded.iat &&
-      user.changedCredentialsTime.getTime() >= decoded.iat * 1000
+      verifiedData.iat &&
+      user.changedCredentialsTime.epochMilliseconds >= verifiedData.iat * 1000
     ) {
       throw new badRequestException("credentials is changed");
     }
     //!6)inject user info into request to be used in operations
-    return { decoded, user };
+    return { decoded: verifiedData, user };
   };
-  // create this function
-  createRevokeToken = ({
+  async RevokeToken({
     userId,
     jti,
     ttl,
@@ -175,5 +175,12 @@ export class TokenService {
     userId: string;
     jti: string;
     ttl: number;
-  }) => {};
+  }) {
+    const key = redisService.revokeTokenGenerator({ jti, userId });
+    await redisService.setValue({
+      key,
+      value: true,
+      ttl,
+    });
+  }
 }

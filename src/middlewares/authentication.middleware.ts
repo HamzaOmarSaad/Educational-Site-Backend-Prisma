@@ -1,12 +1,11 @@
-import { TokenType, tokenTypeEnum } from "../utils/services/token.service";
+import {
+  badRequestException,
+  TokenService,
+  TokenType,
+  tokenTypeEnum,
+} from "../common";
 import { NextFunction, Request, Response } from "express";
-import { badRequestException } from "../utils/res/exceptions/domain.exceptions";
-import { TokenService } from "../utils/services/token.service";
 
-// export interface IRequest extends Request {
-//   user?: HUser;
-//   decoded?: JwtPayload;
-// }
 const tokenService = new TokenService();
 export const auth = (tokenType: TokenType = tokenTypeEnum.access) => {
   return async (req: Request, res: Response, next: NextFunction) => {

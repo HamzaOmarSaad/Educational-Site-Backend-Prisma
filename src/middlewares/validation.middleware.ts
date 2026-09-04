@@ -5,7 +5,7 @@ import {
   badRequestException,
   MapGraphQLError,
   ValidationException,
-} from "../utils/res/exceptions/domain.exceptions";
+} from "../common";
 
 type RequestKey = keyof Request;
 type SchemaType = Partial<Record<RequestKey, z.ZodTypeAny>>;

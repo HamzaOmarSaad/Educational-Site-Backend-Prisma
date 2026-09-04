@@ -76,34 +76,37 @@ enum WalletTransactionType {
 // USER
 // ============================================================
 model User {
-  id               Uuid             @id @default(uuid())
-  name             String
-  email            String           @unique
-  password         String
-  role             UserRole
+  id                     Uuid             @id @default(uuid())
+  name                   String
+  email                  String           @unique
+  password               String
+  role                   UserRole
 
-  phone            String?
-  avatarUrl        String?
+  phone                  String?
+  avatarUrl              String?
+  isVerified             Boolean?
+  changedCredentialsTime DateTime?
+  DeletedAt              DateTime?
 
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime?
 
   // Profiles
-  teacherProfile   TeacherProfile?
-  studentProfile   StudentProfile?
+  teacherProfile         TeacherProfile?
+  studentProfile         StudentProfile?
 
   // Teacher relationships
-  courses          Course[]
+  courses                Course[]
 
   // Student relationships
-  enrollments      Enrollment[]
-  progress         LessonProgress[]
-  quizAttempts     QuizAttempt[]
+  enrollments            Enrollment[]
+  progress               LessonProgress[]
+  quizAttempts           QuizAttempt[]
 
-  wallet           Wallet?
+  wallet                 Wallet?
 
-  vouchersCreated  Voucher[]        @relation("TeacherVouchers")
-  vouchersRedeemed Voucher[]        @relation("VoucherRedemption")
+  vouchersCreated        Voucher[]        @relation("TeacherVouchers")
+  vouchersRedeemed       Voucher[]        @relation("VoucherRedemption")
 
   @@index([role])
 }

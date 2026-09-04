@@ -1,7 +1,7 @@
 import {
   storageApproachEnum,
   uploadFileSizeEnum,
-} from "./../../Enums/multer.enum";
+} from "../../Enums/multer.enum";
 import {
   DeleteObjectCommand,
   DeleteObjectCommandOutput,
@@ -22,7 +22,7 @@ import {
   REGION,
 } from "../../env/config";
 import { randomUUID } from "node:crypto";
-import { badRequestException } from "../res/exceptions/domain.exceptions";
+import { badRequestException } from "../res";
 import { createReadStream } from "node:fs";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";

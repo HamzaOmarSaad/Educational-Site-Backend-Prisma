@@ -1,11 +1,11 @@
-import { storageApproachEnum } from "./../../Enums/multer.enum";
 import type { Request } from "express";
 import multer from "multer";
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 
 import type { FileFilterCallback } from "multer";
-import { badRequestException } from "../res/exceptions/domain.exceptions";
+import { badRequestException } from "../res";
+import { storageApproachEnum } from "../../Enums/multer.enum";
 
 export const fileFieldValidation = {
   image: ["image/png", "image/jpg", "image/jpeg"],
@@ -23,7 +23,9 @@ export const fileFilter = (validation: string[]) => {
     }
 
     if (!validation.includes(file.mimetype)) {
-      return cb(new badRequestException(`Invalid file type: ${file.mimetype}`));
+      return cb(
+        new badRequestException(`Invalid file type: ${file.mimetype}`) as Error,
+      );
     }
 
     return cb(null, true);

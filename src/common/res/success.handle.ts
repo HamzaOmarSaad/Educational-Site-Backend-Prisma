@@ -1,6 +1,6 @@
 import { ISuccess } from "../types/res.type";
 
-export const successRes = ({
+export const successResult = ({
   res,
   message,
   data = {},

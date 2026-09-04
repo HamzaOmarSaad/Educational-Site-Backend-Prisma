@@ -1,8 +1,7 @@
 import { createClient, RedisClientType } from "redis";
 import { REDIS_DB_NAME, REDIS_DB_URI } from "../../env/config";
-import { badRequestException } from "../res/exceptions/domain.exceptions";
 import { emailEnum, redisPurposeEnum } from "../../Enums";
-import { Types } from "mongoose";
+import { badRequestException } from "../res";
 // singleton pattern
 type redisOtpType = {
   email: string;
@@ -22,18 +21,18 @@ export class RedisService {
   public connectRedisDB = async () => {
     try {
       await this.redisClient.connect();
-      console.log("🚀 ~ redis connected successfully");
+      console.log("✅ Redis connected successfully");
     } catch (error) {
-      console.log("🚀 ~ redis connectDB ~ error:", error);
+      console.log("🚀 redis connectDB ~ error:", error);
     }
   };
 
   private handleEvents() {
     this.redisClient.on("error", (error) => {
-      console.log("🚀 ~ RedisService ~ handleEvents ~ error:", error);
+      console.log("🚀  RedisService has error:", error);
     });
     this.redisClient.on("ready", () => {
-      console.log("🚀 ~ RedisService ~ handleEvents ~ ready");
+      console.log("🚀 RedisService is ready");
     });
   }
 
@@ -54,13 +53,13 @@ export class RedisService {
   }: redisOtpType): string => {
     return `${this.keyPrefixGenerator({ purpose: redisPurposeEnum.OTP, identifier: `${email}::${subject}` })}`;
   };
-  public FCMKey(userId: Types.ObjectId | string) {
+  public FCMKey(userId: string) {
     return `user:FCM:${userId}`;
   }
-  public socketKey(userId: Types.ObjectId | string) {
+  public socketKey(userId: string) {
     return `user:sockets:${userId}`;
   }
-  public cacheKey(value: string, userId?: Types.ObjectId | string) {
+  public cacheKey(value: string, userId?: string) {
     return userId ? `REQUEST::${value}::${userId}` : `REQUEST::${value}`;
   }
 
@@ -82,7 +81,7 @@ export class RedisService {
     userId,
   }: {
     jti: string;
-    userId: Types.ObjectId;
+    userId: string;
   }): string => {
     return `${this.keyPrefixGenerator({ purpose: redisPurposeEnum.revokeToken, identifier: userId as unknown as string })}::${jti}`;
   };
@@ -203,35 +202,35 @@ export class RedisService {
     }
   };
   /**--------------------sockets operations ------------------------------------------------ */
-  async addSocket(userId: Types.ObjectId | string, socketId: string) {
+  async addSocket(userId: string, socketId: string) {
     return await this.redisClient.sAdd(this.socketKey(userId), socketId);
   }
 
-  async removeSocket(userId: Types.ObjectId | string, socketId: string) {
+  async removeSocket(userId: string, socketId: string) {
     return await this.redisClient.sRem(this.socketKey(userId), socketId);
   }
 
-  async getSockets(userId: Types.ObjectId | string) {
+  async getSockets(userId: string) {
     return await this.redisClient.sMembers(this.socketKey(userId));
   }
 
-  async hasSockets(userId: Types.ObjectId | string) {
+  async hasSockets(userId: string) {
     return await this.redisClient.sCard(this.socketKey(userId));
   }
 
-  async removeUser(userId: Types.ObjectId | string) {
+  async removeUser(userId: string) {
     return await this.redisClient.del(this.socketKey(userId));
   }
   /**--------------------------notification token operations---------------------------------------------------- */
-  async addFCM(userId: Types.ObjectId | string, FCMToken: string) {
+  async addFCM(userId: string, FCMToken: string) {
     return await this.redisClient.sAdd(this.FCMKey(userId), FCMToken);
   }
 
-  async removeFCM(userId: Types.ObjectId | string, FCMToken: string) {
+  async removeFCM(userId: string, FCMToken: string) {
     return await this.redisClient.sRem(this.FCMKey(userId), FCMToken);
   }
 
-  async getFCMs(userId: Types.ObjectId | string) {
+  async getFCMs(userId: string) {
     return await this.redisClient.sMembers(this.FCMKey(userId));
   }
   /**---------------------------------caching----------------------------------------------------------- */

@@ -2458,10 +2458,24 @@
           },
           "User": {
             "fields": {
+              "DeletedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "avatarUrl": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "changedCredentialsTime": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
               },
@@ -2483,6 +2497,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isVerified": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -2667,8 +2688,14 @@
             },
             "storage": {
               "fields": {
+                "DeletedAt": {
+                  "column": "DeletedAt"
+                },
                 "avatarUrl": {
                   "column": "avatarUrl"
+                },
+                "changedCredentialsTime": {
+                  "column": "changedCredentialsTime"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -2678,6 +2705,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "isVerified": {
+                  "column": "isVerified"
                 },
                 "name": {
                   "column": "name"
@@ -4877,9 +4907,19 @@
                 }
               ],
               "columns": {
+                "DeletedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "avatarUrl": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": true
+                },
+                "changedCredentialsTime": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
                   "nullable": true
                 },
                 "createdAt": {
@@ -4900,6 +4940,11 @@
                   "codecId": "pg/uuid@1",
                   "nativeType": "uuid",
                   "nullable": false
+                },
+                "isVerified": {
+                  "codecId": "pg/bool@1",
+                  "nativeType": "bool",
+                  "nullable": true
                 },
                 "name": {
                   "codecId": "pg/text@1",
@@ -5375,7 +5420,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "0925c4f3e65ea248aac341ac896f52a1868b3d9bed7331e1de4f4a34a8dc7ab8"
+    "storageHash": "fa1af22eea82146efee6923360c577cc8edc81010df61425d40a379b0d5dcc64"
   },
   "execution": {
     "executionHash": "41c6503f971456a03a072f60986660a0f55cbe2fca8a9beaf256f4d0b1c3dff5",

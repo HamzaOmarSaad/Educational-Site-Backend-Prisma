@@ -1,17 +1,17 @@
 import { Socket } from "socket.io";
-import { HUser } from "./../../interfaces";
 import { JwtPayload } from "jsonwebtoken";
+import { IUser } from "../../interfaces";
 
 //declaration manager
 declare module "express-serve-static-core" {
   interface Request {
-    user: HUser;
+    user: IUser;
     decoded: JwtPayload;
   }
 }
 
 export interface IAuthUser {
-  user: HUser;
+  user: IUser;
   decoded: JwtPayload;
 }
 export interface IAuthSocket extends Socket {

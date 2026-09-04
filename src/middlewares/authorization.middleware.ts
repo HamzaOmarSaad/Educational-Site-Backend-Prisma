@@ -1,22 +1,18 @@
+import { IUser, UserRole } from "./../interfaces";
 import { NextFunction, Response, Request } from "express";
-import { RoleEnum } from "../Enums";
-import {
-  MapGraphQLError,
-  unauthorizedException,
-} from "../utils/res/exceptions/domain.exceptions";
-import { HUser } from "../interfaces";
+import { MapGraphQLError, unauthorizedException } from "../common";
 
-export const authorize = (roles: RoleEnum[] = []) => {
+export const authorize = (roles: UserRole[] = []) => {
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!roles.includes(req?.user?.role)) {
+    if (!req.user || !roles.includes(req?.user?.role)) {
       throw new unauthorizedException(" not authorized user ");
     }
     next();
   };
 };
 export const authorizeGQL = async (
-  roles: RoleEnum[] = [],
-  user: HUser,
+  roles: UserRole[] = [],
+  user: IUser,
 ): Promise<boolean> => {
   if (!roles.includes(user?.role)) {
     MapGraphQLError(new unauthorizedException(" not authorized user "));

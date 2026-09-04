@@ -9,7 +9,7 @@ export const email_template = ({
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Email Template</title>
+  <title>verify Email</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;">
 
@@ -23,7 +23,7 @@ export const email_template = ({
           <!-- Header -->
           <tr>
             <td style="background:#1e3a8a; color:#ffffff; padding:20px; text-align:center;">
-              <h1 style="margin:0;">saraha app</h1>
+              <h1 style="margin:0;">Edusite</h1>
             </td>
           </tr>
 
@@ -46,7 +46,7 @@ export const email_template = ({
 
               <p style="margin-top:30px;">
                 Best regards,<br>
-                saraha Team
+                Edusite Team
               </p>
             </td>
           </tr>

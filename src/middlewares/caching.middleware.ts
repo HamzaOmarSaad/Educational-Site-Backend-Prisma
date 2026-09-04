@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import redisService from "../utils/services/redis.service";
+import redisService from "../common/services";
 
 export const cachingMiddleware = (personal: boolean, ttl = 60) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -9,7 +9,7 @@ export const cachingMiddleware = (personal: boolean, ttl = 60) => {
     try {
       const key = redisService.cacheKey(
         req.originalUrl,
-        personal ? req.user?._id : undefined,
+        personal ? req.user?.id : undefined,
       );
 
       // 1. Check cache
