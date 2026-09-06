@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'32f72cac65a6d582bb53032cd3b2601b34d84b5d1850adbc2829a4b94300709f'>;
+  StorageHashBase<'f9e2cdc68f88bfa48c492a1c4210d30d92a7e047eeaa38e66a205ea4bf4cbdbe'>;
 export type ExecutionHash =
   ExecutionHashBase<'55d8ea14ef49c310b3beb07516527a27777a58e31b8afe455351a12b2c3bb865'>;
 export type ProfileHash =
@@ -387,7 +387,7 @@ export type FieldOutputTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
@@ -607,7 +607,7 @@ export type FieldInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
@@ -827,7 +827,7 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly trackId: CodecTypes['pg/uuid@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly teacherProfile: {
       readonly bio: CodecTypes['pg/text@1']['output'] | null;
@@ -1047,7 +1047,7 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly trackId: CodecTypes['pg/uuid@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly teacherProfile: {
       readonly bio: CodecTypes['pg/text@1']['input'] | null;
@@ -2335,7 +2335,7 @@ type ContractBase = Omit<
                 readonly updatedAt: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
@@ -4245,7 +4245,7 @@ type ContractBase = Omit<
                 };
               };
               readonly updatedAt: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/timestamptz-temporal@1';

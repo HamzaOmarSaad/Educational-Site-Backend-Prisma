@@ -76,6 +76,10 @@
       "model": "TeacherWalletBalance",
       "namespace": "public"
     },
+    "track": {
+      "model": "Track",
+      "namespace": "public"
+    },
     "user": {
       "model": "User",
       "namespace": "public"
@@ -191,6 +195,19 @@
               {
                 "name": "TEXT",
                 "value": "TEXT"
+              }
+            ]
+          },
+          "UserGender": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "MALE",
+                "value": "MALE"
+              },
+              {
+                "name": "FEMALE",
+                "value": "FEMALE"
               }
             ]
           },
@@ -324,7 +341,7 @@
                   "namespace": "public"
                 }
               },
-              "subjects": {
+              "tracks": {
                 "cardinality": "1:N",
                 "on": {
                   "localFields": [
@@ -335,7 +352,7 @@
                   ]
                 },
                 "to": {
-                  "model": "Subject",
+                  "model": "Track",
                   "namespace": "public"
                 }
               }
@@ -2033,10 +2050,24 @@
                   "kind": "scalar"
                 }
               },
-              "school": {
-                "nullable": true,
+              "parentPhone": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "school": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "trackId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               },
@@ -2086,6 +2117,21 @@
                   "namespace": "public"
                 }
               },
+              "track": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "trackId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Track",
+                  "namespace": "public"
+                }
+              },
               "user": {
                 "cardinality": "N:1",
                 "on": {
@@ -2116,8 +2162,14 @@
                 "id": {
                   "column": "id"
                 },
+                "parentPhone": {
+                  "column": "parentPhone"
+                },
                 "school": {
                   "column": "school"
+                },
+                "trackId": {
+                  "column": "trackId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -2132,13 +2184,6 @@
           },
           "Subject": {
             "fields": {
-              "academicYearId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/uuid@1",
-                  "kind": "scalar"
-                }
-              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -2167,8 +2212,15 @@
                   "kind": "scalar"
                 }
               },
-              "updatedAt": {
+              "trackId": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
@@ -2176,21 +2228,6 @@
               }
             },
             "relations": {
-              "academicYear": {
-                "cardinality": "N:1",
-                "on": {
-                  "localFields": [
-                    "academicYearId"
-                  ],
-                  "targetFields": [
-                    "id"
-                  ]
-                },
-                "to": {
-                  "model": "AcademicYear",
-                  "namespace": "public"
-                }
-              },
               "courses": {
                 "cardinality": "1:N",
                 "on": {
@@ -2205,13 +2242,25 @@
                   "model": "Course",
                   "namespace": "public"
                 }
+              },
+              "track": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "trackId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Track",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
               "fields": {
-                "academicYearId": {
-                  "column": "academicYearId"
-                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -2223,6 +2272,9 @@
                 },
                 "name": {
                   "column": "name"
+                },
+                "trackId": {
+                  "column": "trackId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -2456,6 +2508,113 @@
               "table": "teacherWalletBalance"
             }
           },
+          "Track": {
+            "fields": {
+              "academicYearId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "academicYear": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "academicYearId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "AcademicYear",
+                  "namespace": "public"
+                }
+              },
+              "students": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "trackId"
+                  ]
+                },
+                "to": {
+                  "model": "StudentProfile",
+                  "namespace": "public"
+                }
+              },
+              "subjects": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "trackId"
+                  ]
+                },
+                "to": {
+                  "model": "Subject",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "academicYearId": {
+                  "column": "academicYearId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "description": {
+                  "column": "description"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                }
+              },
+              "namespaceId": "public",
+              "table": "track"
+            }
+          },
           "User": {
             "fields": {
               "DeletedAt": {
@@ -2465,10 +2624,10 @@
                   "kind": "scalar"
                 }
               },
-              "avatarUrl": {
+              "EmailConfirmedAt": {
                 "nullable": true,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
               },
@@ -2493,17 +2652,23 @@
                   "kind": "scalar"
                 }
               },
+              "gender": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "UserGender",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
-                  "kind": "scalar"
-                }
-              },
-              "isVerified": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -2522,6 +2687,13 @@
                 }
               },
               "phone": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "profilePicture": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -2691,8 +2863,8 @@
                 "DeletedAt": {
                   "column": "DeletedAt"
                 },
-                "avatarUrl": {
-                  "column": "avatarUrl"
+                "EmailConfirmedAt": {
+                  "column": "EmailConfirmedAt"
                 },
                 "changedCredentialsTime": {
                   "column": "changedCredentialsTime"
@@ -2703,11 +2875,11 @@
                 "email": {
                   "column": "email"
                 },
+                "gender": {
+                  "column": "gender"
+                },
                 "id": {
                   "column": "id"
-                },
-                "isVerified": {
-                  "column": "isVerified"
                 },
                 "name": {
                   "column": "name"
@@ -2717,6 +2889,9 @@
                 },
                 "phone": {
                   "column": "phone"
+                },
+                "profilePicture": {
+                  "column": "profilePicture"
                 },
                 "role": {
                   "column": "role"
@@ -4532,9 +4707,19 @@
                   "nativeType": "uuid",
                   "nullable": false
                 },
+                "parentPhone": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "school": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": false
+                },
+                "trackId": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
                   "nullable": true
                 },
                 "updatedAt": {
@@ -4597,6 +4782,23 @@
                     "namespaceId": "public",
                     "tableName": "academicYear"
                   }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "trackId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "studentProfile"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "track"
+                  }
                 }
               ],
               "indexes": [
@@ -4615,6 +4817,14 @@
                   "name": "studentProfile_gradeId_idx_624f4a73",
                   "prefix": "studentProfile_gradeId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "trackId"
+                  ],
+                  "name": "studentProfile_trackId_idx_8b560769",
+                  "prefix": "studentProfile_trackId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -4632,11 +4842,6 @@
             },
             "subject": {
               "columns": {
-                "academicYearId": {
-                  "codecId": "pg/uuid@1",
-                  "nativeType": "uuid",
-                  "nullable": false
-                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "default": {
@@ -4661,10 +4866,15 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "trackId": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "nativeType": "timestamptz",
-                  "nullable": false
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -4672,7 +4882,7 @@
                   "onDelete": "cascade",
                   "source": {
                     "columns": [
-                      "academicYearId"
+                      "trackId"
                     ],
                     "namespaceId": "public",
                     "tableName": "subject"
@@ -4682,17 +4892,17 @@
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "academicYear"
+                    "tableName": "track"
                   }
                 }
               ],
               "indexes": [
                 {
                   "columns": [
-                    "academicYearId"
+                    "trackId"
                   ],
-                  "name": "subject_academicYearId_idx_420494e0",
-                  "prefix": "subject_academicYearId_idx",
+                  "name": "subject_trackId_idx_8b560769",
+                  "prefix": "subject_trackId_idx",
                   "unique": false
                 }
               ],
@@ -4704,7 +4914,7 @@
               "uniques": [
                 {
                   "columns": [
-                    "academicYearId",
+                    "trackId",
                     "name"
                   ]
                 }
@@ -4898,8 +5108,88 @@
                 }
               ]
             },
+            "track": {
+              "columns": {
+                "academicYearId": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "academicYearId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "track"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "academicYear"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "academicYearId"
+                  ],
+                  "name": "track_academicYearId_idx_420494e0",
+                  "prefix": "track_academicYearId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "academicYearId",
+                    "name"
+                  ]
+                }
+              ]
+            },
             "user": {
               "checks": [
+                {
+                  "expression": "\"gender\" IN ('MALE', 'FEMALE')",
+                  "name": "user_gender_check_9e8dd636",
+                  "prefix": "user_gender_check"
+                },
                 {
                   "expression": "\"role\" IN ('STUDENT', 'TEACHER', 'ADMIN')",
                   "name": "user_role_check_1356fde6",
@@ -4912,9 +5202,9 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
-                "avatarUrl": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
+                "EmailConfirmedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
                   "nullable": true
                 },
                 "changedCredentialsTime": {
@@ -4936,15 +5226,21 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "gender": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "UserGender",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "nativeType": "uuid",
                   "nullable": false
-                },
-                "isVerified": {
-                  "codecId": "pg/bool@1",
-                  "nativeType": "bool",
-                  "nullable": true
                 },
                 "name": {
                   "codecId": "pg/text@1",
@@ -4957,6 +5253,11 @@
                   "nullable": false
                 },
                 "phone": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "profilePicture": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -5388,6 +5689,13 @@
                 "TEXT"
               ]
             },
+            "UserGender": {
+              "kind": "valueSet",
+              "values": [
+                "MALE",
+                "FEMALE"
+              ]
+            },
             "UserRole": {
               "kind": "valueSet",
               "values": [
@@ -5420,10 +5728,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "fa1af22eea82146efee6923360c577cc8edc81010df61425d40a379b0d5dcc64"
+    "storageHash": "32f72cac65a6d582bb53032cd3b2601b34d84b5d1850adbc2829a4b94300709f"
   },
   "execution": {
-    "executionHash": "41c6503f971456a03a072f60986660a0f55cbe2fca8a9beaf256f4d0b1c3dff5",
+    "executionHash": "55d8ea14ef49c310b3beb07516527a27777a58e31b8afe455351a12b2c3bb865",
     "mutations": {
       "defaults": [
         {
@@ -5622,6 +5930,17 @@
             "column": "id",
             "namespace": "public",
             "table": "teacherWalletBalance"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "track"
           }
         },
         {

@@ -8,35 +8,42 @@ export enum UserRole {
   TEACHER = "TEACHER",
   ADMIN = "ADMIN",
 }
+export enum UserGender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+}
 
 // ============================================================
 // USER
 // ============================================================
 
 export interface IUser {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   password: string;
   role: UserRole;
+  gender: UserGender;
   phone?: string;
   avatarUrl?: string;
+
   createdAt: Date;
   updatedAt?: Date;
+  EmailConfirmedAt?: Date;
 
   teacherProfile?: ITeacherProfile;
   studentProfile?: IStudentProfile;
 
-  courses: ICourse[];
+  courses?: ICourse[];
 
-  enrollments: IEnrollment[];
-  progress: ILessonProgress[];
-  quizAttempts: IQuizAttempt[];
+  enrollments?: IEnrollment[];
+  progress?: ILessonProgress[];
+  quizAttempts?: IQuizAttempt[];
 
   wallet?: IWallet;
 
-  vouchersCreated: IVoucher[];
-  vouchersRedeemed: IVoucher[];
+  vouchersCreated?: IVoucher[];
+  vouchersRedeemed?: IVoucher[];
 }
 
 // ============================================================

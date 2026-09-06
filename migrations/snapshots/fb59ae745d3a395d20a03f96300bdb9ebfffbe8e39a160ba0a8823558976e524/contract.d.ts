@@ -33,9 +33,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'32f72cac65a6d582bb53032cd3b2601b34d84b5d1850adbc2829a4b94300709f'>;
+  StorageHashBase<'fb59ae745d3a395d20a03f96300bdb9ebfffbe8e39a160ba0a8823558976e524'>;
 export type ExecutionHash =
-  ExecutionHashBase<'55d8ea14ef49c310b3beb07516527a27777a58e31b8afe455351a12b2c3bb865'>;
+  ExecutionHashBase<'41c6503f971456a03a072f60986660a0f55cbe2fca8a9beaf256f4d0b1c3dff5'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -376,18 +376,17 @@ export type FieldOutputTypes = {
       readonly school: CodecTypes['pg/text@1']['output'];
       readonly gradeId: CodecTypes['pg/uuid@1']['output'];
       readonly academicYearId: CodecTypes['pg/uuid@1']['output'] | null;
-      readonly trackId: CodecTypes['pg/uuid@1']['output'] | null;
       readonly parentPhone: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     };
     readonly Subject: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
-      readonly trackId: CodecTypes['pg/uuid@1']['output'];
+      readonly academicYearId: CodecTypes['pg/uuid@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
@@ -406,13 +405,6 @@ export type FieldOutputTypes = {
       readonly balance: CodecTypes['pg/numeric@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
-    };
-    readonly Track: {
-      readonly id: CodecTypes['pg/uuid@1']['output'];
-      readonly academicYearId: CodecTypes['pg/uuid@1']['output'];
-      readonly name: CodecTypes['pg/text@1']['output'];
-      readonly description: CodecTypes['pg/text@1']['output'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly User: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
@@ -596,18 +588,17 @@ export type FieldInputTypes = {
       readonly school: CodecTypes['pg/text@1']['input'];
       readonly gradeId: CodecTypes['pg/uuid@1']['input'];
       readonly academicYearId: CodecTypes['pg/uuid@1']['input'] | null;
-      readonly trackId: CodecTypes['pg/uuid@1']['input'] | null;
       readonly parentPhone: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
     };
     readonly Subject: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
-      readonly trackId: CodecTypes['pg/uuid@1']['input'];
+      readonly academicYearId: CodecTypes['pg/uuid@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
@@ -626,13 +617,6 @@ export type FieldInputTypes = {
       readonly balance: CodecTypes['pg/numeric@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
-    };
-    readonly Track: {
-      readonly id: CodecTypes['pg/uuid@1']['input'];
-      readonly academicYearId: CodecTypes['pg/uuid@1']['input'];
-      readonly name: CodecTypes['pg/text@1']['input'];
-      readonly description: CodecTypes['pg/text@1']['input'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly User: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
@@ -817,17 +801,16 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly parentPhone: CodecTypes['pg/text@1']['output'];
       readonly school: CodecTypes['pg/text@1']['output'];
-      readonly trackId: CodecTypes['pg/uuid@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['output'];
     };
     readonly subject: {
+      readonly academicYearId: CodecTypes['pg/uuid@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly trackId: CodecTypes['pg/uuid@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly teacherProfile: {
       readonly bio: CodecTypes['pg/text@1']['output'] | null;
@@ -846,13 +829,6 @@ export type StorageColumnTypes = {
       readonly teacherId: CodecTypes['pg/uuid@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly walletId: CodecTypes['pg/uuid@1']['output'];
-    };
-    readonly track: {
-      readonly academicYearId: CodecTypes['pg/uuid@1']['output'];
-      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly description: CodecTypes['pg/text@1']['output'] | null;
-      readonly id: CodecTypes['pg/uuid@1']['output'];
-      readonly name: CodecTypes['pg/text@1']['output'];
     };
     readonly user: {
       readonly changedCredentialsTime: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -1037,17 +1013,16 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly parentPhone: CodecTypes['pg/text@1']['input'];
       readonly school: CodecTypes['pg/text@1']['input'];
-      readonly trackId: CodecTypes['pg/uuid@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['input'];
     };
     readonly subject: {
+      readonly academicYearId: CodecTypes['pg/uuid@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly trackId: CodecTypes['pg/uuid@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly teacherProfile: {
       readonly bio: CodecTypes['pg/text@1']['input'] | null;
@@ -1066,13 +1041,6 @@ export type StorageColumnInputTypes = {
       readonly teacherId: CodecTypes['pg/uuid@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly walletId: CodecTypes['pg/uuid@1']['input'];
-    };
-    readonly track: {
-      readonly academicYearId: CodecTypes['pg/uuid@1']['input'];
-      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly description: CodecTypes['pg/text@1']['input'] | null;
-      readonly id: CodecTypes['pg/uuid@1']['input'];
-      readonly name: CodecTypes['pg/text@1']['input'];
     };
     readonly user: {
       readonly changedCredentialsTime: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
@@ -2209,11 +2177,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/uuid@1';
                   readonly nullable: true;
                 };
-                readonly trackId: {
-                  readonly nativeType: 'uuid';
-                  readonly codecId: 'pg/uuid@1';
-                  readonly nullable: true;
-                };
                 readonly parentPhone: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -2244,12 +2207,6 @@ type ContractBase = Omit<
                   readonly name: 'studentProfile_academicYearId_idx_420494e0';
                   readonly prefix: 'studentProfile_academicYearId_idx';
                   readonly columns: readonly ['academicYearId'];
-                  readonly unique: false;
-                },
-                {
-                  readonly name: 'studentProfile_trackId_idx_8b560769';
-                  readonly prefix: 'studentProfile_trackId_idx';
-                  readonly columns: readonly ['trackId'];
                   readonly unique: false;
                 },
               ];
@@ -2290,18 +2247,6 @@ type ContractBase = Omit<
                     readonly columns: readonly ['id'];
                   };
                 },
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'studentProfile';
-                    readonly columns: readonly ['trackId'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'track';
-                    readonly columns: readonly ['id'];
-                  };
-                },
               ];
             };
             readonly subject: {
@@ -2311,7 +2256,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
                 };
-                readonly trackId: {
+                readonly academicYearId: {
                   readonly nativeType: 'uuid';
                   readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
@@ -2335,16 +2280,16 @@ type ContractBase = Omit<
                 readonly updatedAt: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['trackId', 'name'] }];
+              uniques: readonly [{ readonly columns: readonly ['academicYearId', 'name'] }];
               indexes: readonly [
                 {
-                  readonly name: 'subject_trackId_idx_8b560769';
-                  readonly prefix: 'subject_trackId_idx';
-                  readonly columns: readonly ['trackId'];
+                  readonly name: 'subject_academicYearId_idx_420494e0';
+                  readonly prefix: 'subject_academicYearId_idx';
+                  readonly columns: readonly ['academicYearId'];
                   readonly unique: false;
                 },
               ];
@@ -2353,11 +2298,11 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'subject';
-                    readonly columns: readonly ['trackId'];
+                    readonly columns: readonly ['academicYearId'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'track';
+                    readonly tableName: 'academicYear';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -2501,60 +2446,6 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'user';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
-            };
-            readonly track: {
-              columns: {
-                readonly id: {
-                  readonly nativeType: 'uuid';
-                  readonly codecId: 'pg/uuid@1';
-                  readonly nullable: false;
-                };
-                readonly academicYearId: {
-                  readonly nativeType: 'uuid';
-                  readonly codecId: 'pg/uuid@1';
-                  readonly nullable: false;
-                };
-                readonly name: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly description: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly createdAt: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                  readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['academicYearId', 'name'] }];
-              indexes: readonly [
-                {
-                  readonly name: 'track_academicYearId_idx_420494e0';
-                  readonly prefix: 'track_academicYearId_idx';
-                  readonly columns: readonly ['academicYearId'];
-                  readonly unique: false;
-                },
-              ];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'track';
-                    readonly columns: readonly ['academicYearId'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'academicYear';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -2951,7 +2842,6 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'AcademicYear';
     };
-    readonly track: { readonly namespace: 'public' & NamespaceId; readonly model: 'Track' };
     readonly subject: { readonly namespace: 'public' & NamespaceId; readonly model: 'Subject' };
     readonly course: { readonly namespace: 'public' & NamespaceId; readonly model: 'Course' };
     readonly courseSection: {
@@ -3053,10 +2943,10 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['academicYearId'];
                 };
               };
-              readonly tracks: {
+              readonly subjects: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Track';
+                  readonly model: 'Subject';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -4137,10 +4027,6 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly trackId: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
-              };
               readonly parentPhone: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -4183,17 +4069,6 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
-              readonly track: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Track';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['trackId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
@@ -4212,7 +4087,6 @@ type ContractBase = Omit<
                 readonly school: { readonly column: 'school' };
                 readonly gradeId: { readonly column: 'gradeId' };
                 readonly academicYearId: { readonly column: 'academicYearId' };
-                readonly trackId: { readonly column: 'trackId' };
                 readonly parentPhone: { readonly column: 'parentPhone' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
@@ -4225,7 +4099,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly trackId: {
+              readonly academicYearId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
@@ -4245,7 +4119,7 @@ type ContractBase = Omit<
                 };
               };
               readonly updatedAt: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/timestamptz-temporal@1';
@@ -4253,6 +4127,17 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
+              readonly academicYear: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'AcademicYear';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['academicYearId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
               readonly courses: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -4264,24 +4149,13 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['subjectId'];
                 };
               };
-              readonly track: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Track';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['trackId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
             };
             readonly storage: {
               readonly table: 'subject';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly trackId: { readonly column: 'trackId' };
+                readonly academicYearId: { readonly column: 'academicYearId' };
                 readonly name: { readonly column: 'name' };
                 readonly description: { readonly column: 'description' };
                 readonly createdAt: { readonly column: 'createdAt' };
@@ -4430,79 +4304,6 @@ type ContractBase = Omit<
                 readonly balance: { readonly column: 'balance' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
-              };
-            };
-          };
-          readonly Track: {
-            readonly fields: {
-              readonly id: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
-              };
-              readonly academicYearId: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
-              };
-              readonly name: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly description: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly createdAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                };
-              };
-            };
-            readonly relations: {
-              readonly academicYear: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'AcademicYear';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['academicYearId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
-              readonly students: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'StudentProfile';
-                };
-                readonly cardinality: '1:N';
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['trackId'];
-                };
-              };
-              readonly subjects: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Subject';
-                };
-                readonly cardinality: '1:N';
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['trackId'];
-                };
-              };
-            };
-            readonly storage: {
-              readonly table: 'track';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly id: { readonly column: 'id' };
-                readonly academicYearId: { readonly column: 'academicYearId' };
-                readonly name: { readonly column: 'name' };
-                readonly description: { readonly column: 'description' };
-                readonly createdAt: { readonly column: 'createdAt' };
               };
             };
           };
@@ -5174,14 +4975,6 @@ type ContractBase = Omit<
           readonly ref: {
             readonly namespace: 'public';
             readonly table: 'teacherWalletBalance';
-            readonly column: 'id';
-          };
-          readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };
-        },
-        {
-          readonly ref: {
-            readonly namespace: 'public';
-            readonly table: 'track';
             readonly column: 'id';
           };
           readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };

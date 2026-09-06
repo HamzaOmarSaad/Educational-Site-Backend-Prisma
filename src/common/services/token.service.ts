@@ -10,7 +10,7 @@ import {
 import redisService from "./redis.service";
 import { badRequestException } from "../res";
 import { UserRole } from "../../interfaces";
-import { userModel } from "../../prisma/db";
+import userRepository from "../../repos/user.repo";
 
 export const tokenTypeEnum = {
   access: "access",
@@ -149,9 +149,7 @@ export class TokenService {
     );
     const verifiedData = this.verify({ token, secret, tokenType });
 
-    const user = await userModel
-      .where({ id: verifiedData.sub as string })
-      .first();
+    const user = await userRepository.findById(verifiedData.sub as string);
 
     if (!user) {
       throw new badRequestException("No user with these credentials ");

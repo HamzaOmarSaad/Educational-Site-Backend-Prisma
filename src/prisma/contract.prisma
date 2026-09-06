@@ -11,6 +11,13 @@ enum UserRole {
   ADMIN
 }
 
+enum UserGender {
+  @@type("pg/text@1")
+
+  MALE
+  FEMALE
+}
+
 enum CourseStatus {
   @@type("pg/text@1")
 
@@ -81,12 +88,14 @@ model User {
   email                  String           @unique
   password               String
   role                   UserRole
+  gender                 UserGender
 
   phone                  String?
-  avatarUrl              String?
-  isVerified             Boolean?
+  profilePicture         String?
+
   changedCredentialsTime DateTime?
   DeletedAt              DateTime?
+  EmailConfirmedAt       DateTime?
 
   createdAt              DateTime         @default(now())
   updatedAt              DateTime?
@@ -136,9 +145,12 @@ model StudentProfile {
   id             Uuid          @id @default(uuid())
   userId         Uuid          @unique
 
-  school         String?
+  school         String
   gradeId        Uuid
   academicYearId Uuid?
+  trackId        Uuid?
+
+  parentPhone    String
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime?
@@ -148,9 +160,11 @@ model StudentProfile {
   grade          Grade         @relation(fields:[gradeId], references:[id])
 
   academicYear   AcademicYear? @relation(fields:[academicYearId], references:[id])
+  track          Track?        @relation(fields:[trackId], references:[id], onDelete: Cascade)
 
   @@index([gradeId])
   @@index([academicYearId])
+  @@index([trackId])
 }
 
 // ============================================================
@@ -186,33 +200,55 @@ model AcademicYear {
 
   grade     Grade            @relation(fields:[gradeId], references:[id], onDelete: Cascade)
 
-  students  StudentProfile[]
+  tracks    Track[]
 
-  subjects  Subject[]
+  students  StudentProfile[]
 
   @@unique([gradeId, year])
   @@index([gradeId])
 }
 
 // ============================================================
-// SUBJECT
+// Track 
 // ============================================================
-model Subject {
-  id             Uuid         @id @default(uuid())
+model Track {
+  id             Uuid             @id @default(uuid())
   academicYearId Uuid
 
   name           String
   description    String?
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime
+  createdAt      DateTime         @default(now())
 
-  academicYear   AcademicYear @relation(fields:[academicYearId], references:[id], onDelete: Cascade)
+  academicYear   AcademicYear     @relation(fields:[academicYearId], references:[id], onDelete: Cascade)
 
-  courses        Course[]
+  students       StudentProfile[]
+
+  subjects       Subject[]
 
   @@unique([academicYearId, name])
   @@index([academicYearId])
+}
+
+// ============================================================
+// SUBJECT
+// ============================================================
+model Subject {
+  id          Uuid     @id @default(uuid())
+  trackId     Uuid
+
+  name        String
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime?
+
+  track       Track    @relation(fields:[trackId], references:[id], onDelete: Cascade)
+
+  courses     Course[]
+
+  @@unique([trackId, name])
+  @@index([trackId])
 }
 
 // ============================================================
