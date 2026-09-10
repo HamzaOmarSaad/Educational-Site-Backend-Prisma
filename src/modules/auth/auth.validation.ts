@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { generalValidationFields } from "../../common";
 import { GradeEnum, trackYear } from "../../Enums";
+import { UserGender } from "../../interfaces";
 
 export const loginSchema = {
   body: z.strictObject({
@@ -19,6 +20,7 @@ export const signupSchema = {
       school: z.string().min(3).max(16),
       grade: z.enum(GradeEnum),
       track: z.enum(trackYear),
+      gender: z.enum(UserGender),
     })
     .refine(
       (val) => {

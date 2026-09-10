@@ -7,6 +7,7 @@ import {
 import { NextFunction, Request, Response } from "express";
 
 const tokenService = new TokenService();
+
 export const auth = (tokenType: TokenType = tokenTypeEnum.access) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authorization = req.headers["authorization"] as string | undefined;

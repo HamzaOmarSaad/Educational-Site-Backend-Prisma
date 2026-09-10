@@ -2,58 +2,106 @@ import { emailEnum } from "../../Enums";
 import { badRequestException } from "../res";
 import redisService from "../services";
 
-export const generateOTP = () => {
-  return Math.floor(Math.random() * 900000 + 100000);
+const MAX_OTP_ATTEMPTS = 3;
+const ATTEMPTS_TTL = 5 * 60;
+const BLOCK_TTL = 7 * 60;
+
+export const generateOTP = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
-export const checkBlockedOTP = async (email: string, subject: emailEnum) => {
+
+export const checkBlockedOTP = async (
+  email: string,
+  subject: emailEnum,
+): Promise<void> => {
   const blockedKey = redisService.BlockedOTPKey({
     email,
     subject,
   });
-  const isBlockedTTL = await redisService.TTL({
+
+  const ttl = await redisService.TTL({
     key: blockedKey,
   });
 
-  if (isBlockedTTL > 0) {
+  if (ttl > 0) {
     throw new badRequestException(
-      `Sorry, you are blocked. Try again after ${isBlockedTTL} seconds`,
+      `Too many wrong attempts. Try again after ${ttl} seconds.`,
     );
   }
 };
-export const checkActiveOTP = async (otpKey: string) => {
-  const remainingOtpTTL = await redisService.TTL({
-    key: otpKey,
-  });
 
-  if (remainingOtpTTL > 0) {
-    throw new badRequestException(
-      `Current OTP still active. Try again after ${remainingOtpTTL} seconds`,
-    );
-  }
-};
-export const checkOTPAttempts = async (email: string, subject: emailEnum) => {
-  const blockedKey = redisService.BlockedOTPKey({
+export const checkOTPCooldown = async (
+  email: string,
+  subject: emailEnum,
+): Promise<void> => {
+  const cooldownKey = redisService.OTPCooldownKey({
     email,
     subject,
   });
+
+  const ttl = await redisService.TTL({
+    key: cooldownKey,
+  });
+
+  if (ttl > 0) {
+    throw new badRequestException(
+      `Please wait ${ttl} seconds before requesting another OTP.`,
+    );
+  }
+};
+
+export const registerWrongOTPAttempt = async (
+  email: string,
+  subject: emailEnum,
+): Promise<void> => {
   const attemptsKey = redisService.maxAttemptOTPKey({
+    email,
+    subject,
+  });
+
+  const blockedKey = redisService.BlockedOTPKey({
     email,
     subject,
   });
 
   const attempts = await redisService.incr(attemptsKey);
 
+  // First wrong attempt: start expiration timer
   if (attempts === 1) {
-    await redisService.expire({ key: attemptsKey, ttl: 300 });
+    await redisService.expire({
+      key: attemptsKey,
+      ttl: ATTEMPTS_TTL,
+    });
   }
 
-  if (attempts > 3) {
+  // Block after maximum attempts
+  if (attempts >= MAX_OTP_ATTEMPTS) {
     await redisService.setValue({
       key: blockedKey,
-      value: 1,
-      ttl: 7 * 60,
+      value: true,
+      ttl: BLOCK_TTL,
     });
 
-    throw new badRequestException("Sorry, you have reached the limit");
+    await redisService.deleteValue({
+      key: attemptsKey,
+    });
+
+    throw new badRequestException(
+      `Too many wrong OTP attempts. You are blocked for ${BLOCK_TTL / 60} minutes.`,
+    );
   }
+};
+
+export const clearOTPAttempts = async (
+  email: string,
+  subject: emailEnum,
+): Promise<void> => {
+  const attemptsKey = redisService.maxAttemptOTPKey({
+    email,
+    subject,
+  });
+
+  await redisService.deleteValue({
+    key: attemptsKey,
+  });
 };

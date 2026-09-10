@@ -4,11 +4,16 @@ import {
   EmailService,
   encryptService,
   hashService,
+  verifyHashService,
 } from "../../common";
 import emailService from "../../common/email";
-import redisService, { TokenService } from "../../common/services";
+import redisService, {
+  NotificationService,
+  notificationService,
+  TokenService,
+} from "../../common/services";
 import { emailEnum } from "../../Enums";
-import { UserGender, UserRole } from "../../interfaces";
+import { UserRole } from "../../interfaces";
 import {
   academicYearRepository,
   AcademicYearRepository,
@@ -21,7 +26,12 @@ import {
   userRepository,
   UserRepository,
 } from "../../repositories";
-import { confirmEmailDTo, ISignupDTO } from "./auth.dto";
+import {
+  confirmEmailDTo,
+  ILoginDTO,
+  ISignupDTO,
+  resendEmailDTO,
+} from "./auth.dto";
 
 export class AuthService {
   private userRepository: UserRepository;
@@ -29,10 +39,9 @@ export class AuthService {
   private gradeRepository: GradeRepository;
   private trackRepository: TrackRepository;
   private academicYearRepository: AcademicYearRepository;
-  //   private redis: typeof redisService;
-  //   private tokenService;
-  //   private GoogleClient;
-  //   private notificationService: NotificationService;
+  private redis: typeof redisService;
+  private tokenService;
+  private notificationService: NotificationService;
   private email: EmailService;
   constructor() {
     this.studentRepository = studentProfileRepository;
@@ -40,11 +49,10 @@ export class AuthService {
     this.gradeRepository = gradeRepository;
     this.trackRepository = trackRepository;
     this.academicYearRepository = academicYearRepository;
-    // this.redis = redisService;
-    // this.tokenService = new TokenService();
+    this.redis = redisService;
+    this.tokenService = new TokenService();
     this.email = emailService;
-    // this.notificationService = notificationService;
-    // this.GoogleClient = new OAuth2Client(CLIENT_ID);
+    this.notificationService = notificationService;
   }
 
   async signup({
@@ -56,6 +64,7 @@ export class AuthService {
     school,
     grade,
     track,
+    gender,
   }: ISignupDTO) {
     const isEmail = await this.userRepository.findOne({ email });
     if (isEmail) {
@@ -68,7 +77,7 @@ export class AuthService {
     const user = await this.userRepository.create({
       name,
       email,
-      gender: UserGender.MALE,
+      gender,
       role: UserRole.STUDENT,
       password: hashedPass,
       phone: encryptedPhone,
@@ -78,8 +87,12 @@ export class AuthService {
     if (!studGrade) throw new conflictException("fail to find grade ");
     const studTrack = await this.trackRepository.findOne({ name: track });
     if (!studTrack) throw new conflictException("fail to find track ");
+    let year = new Date().getFullYear();
+    if (new Date().getMonth() > 7) {
+      year++;
+    }
     const studAcademicYear = await this.academicYearRepository.findOne({
-      year: new Date().getFullYear(),
+      year,
     });
     if (!studAcademicYear)
       throw new conflictException("fail to find academicYear ");
@@ -92,17 +105,57 @@ export class AuthService {
       trackId: studTrack.id,
       academicYearId: studAcademicYear.id,
     });
+    if (!student) {
+      this.userRepository.deleteById(user.id);
+      throw new badRequestException("failed to create your account  ");
+    }
     await this.email.sendEmailOTP({
       email,
       subject: emailEnum.confirmEmail,
-      title: "email confirmation",
+      title: "Email confirmation",
     });
 
     return { message: " signup done login to proceed", student };
   }
-  async login() {}
+  public async login({ email, password, FCM }: ILoginDTO, issuer: string) {
+    const user = await this.userRepository.findOne({ email });
+    if (!user) {
+      throw new badRequestException("wrong credential");
+    }
+    const passMatch = await verifyHashService(
+      password,
+      user.password as string,
+    );
+    if (!passMatch) {
+      throw new badRequestException("wrong credential");
+    }
+    const { accessToken, refreshToken } = this.tokenService.createLoginTokens({
+      user: user,
+      iss: issuer,
+    });
+    if (FCM) {
+      await this.redis.addFCM(user.id, FCM);
+      const tokens = await this.redis.getFCMs(user.id);
+      if (tokens?.length) {
+        this.notificationService.sendNotifications({
+          tokens,
+          data: {
+            title: "login ",
+            body: `new login is detected at ${Date.now()} `,
+          },
+        });
+      }
+    }
+
+    return { accessToken, refreshToken, user };
+  }
+
   async confirmEmail({ email, otp }: confirmEmailDTo) {
+    console.log("🚀 ~ AuthService ~ confirmEmail ~ email:", email);
     return await this.email.confirmEmail(email, otp);
+  }
+  async resendEmail({ email }: resendEmailDTO) {
+    return await this.email.resendEmail(email);
   }
 }
 

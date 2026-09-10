@@ -10,7 +10,7 @@ import {
 import redisService from "./redis.service";
 import { badRequestException } from "../res";
 import { UserRole } from "../../interfaces";
-import userRepository from "../../repos/user.repo";
+import { userRepository } from "../../repositories";
 
 export const tokenTypeEnum = {
   access: "access",
@@ -158,7 +158,7 @@ export class TokenService {
     if (
       user.changedCredentialsTime &&
       verifiedData.iat &&
-      user.changedCredentialsTime.epochMilliseconds >= verifiedData.iat * 1000
+      Number(user.changedCredentialsTime) >= verifiedData.iat * 1000
     ) {
       throw new badRequestException("credentials is changed");
     }

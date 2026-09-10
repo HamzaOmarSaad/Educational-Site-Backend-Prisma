@@ -32,7 +32,7 @@ export const email_template = ({
             <td style="padding:30px; color:#333333;">
               <h2 style="margin-top:0;">Hello</h2>
               <p style="line-height:1.6;">
-                Welcome!${title} .
+                Welcome! ${title} .
               </p>
 
               <p style="line-height:1.6;">

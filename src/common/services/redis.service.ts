@@ -3,7 +3,8 @@ import { REDIS_DB_NAME, REDIS_DB_URI } from "../../env/config";
 import { emailEnum, redisPurposeEnum } from "../../Enums";
 import { badRequestException } from "../res";
 // singleton pattern
-type redisOtpType = {
+
+type RedisOTPType = {
   email: string;
   subject: emailEnum;
 };
@@ -37,6 +38,15 @@ export class RedisService {
   }
 
   /**----------------------keys----------------------------------- */
+  public FCMKey(userId: string) {
+    return `USER:FCM:${userId}`;
+  }
+  public socketKey(userId: string) {
+    return `USER:sockets:${userId}`;
+  }
+  public cacheKey(value: string, userId?: string) {
+    return userId ? `REQUEST::${value}::${userId}` : `REQUEST::${value}`;
+  }
   public keyPrefixGenerator = ({
     purpose,
     identifier,
@@ -47,35 +57,33 @@ export class RedisService {
     return `User::${purpose}::${identifier}`;
   };
 
-  public OTPKey = ({
-    email,
-    subject = emailEnum.confirmEmail,
-  }: redisOtpType): string => {
-    return `${this.keyPrefixGenerator({ purpose: redisPurposeEnum.OTP, identifier: `${email}::${subject}` })}`;
-  };
-  public FCMKey(userId: string) {
-    return `user:FCM:${userId}`;
-  }
-  public socketKey(userId: string) {
-    return `user:sockets:${userId}`;
-  }
-  public cacheKey(value: string, userId?: string) {
-    return userId ? `REQUEST::${value}::${userId}` : `REQUEST::${value}`;
-  }
-
-  public maxAttemptOTPKey = ({
-    email,
-    subject = emailEnum.confirmEmail,
-  }: redisOtpType): string => {
-    return `${this.keyPrefixGenerator({ purpose: redisPurposeEnum.OTP, identifier: `${email}::${subject}` })}::maxTrail`;
-  };
-  public BlockedOTPKey = ({
-    email,
-    subject = emailEnum.confirmEmail,
-  }: redisOtpType): string => {
-    return `${this.keyPrefixGenerator({ purpose: redisPurposeEnum.OTP, identifier: `${email}::${subject}` })}::blocked`;
+  public OTPKey = ({ email, subject }: RedisOTPType): string => {
+    return `${this.keyPrefixGenerator({
+      purpose: redisPurposeEnum.OTP,
+      identifier: `${email}::${subject}`,
+    })}::code`;
   };
 
+  public OTPCooldownKey = ({ email, subject }: RedisOTPType): string => {
+    return `${this.keyPrefixGenerator({
+      purpose: redisPurposeEnum.OTP,
+      identifier: `${email}::${subject}`,
+    })}::cooldown`;
+  };
+
+  public maxAttemptOTPKey = ({ email, subject }: RedisOTPType): string => {
+    return `${this.keyPrefixGenerator({
+      purpose: redisPurposeEnum.OTP,
+      identifier: `${email}::${subject}`,
+    })}::attempts`;
+  };
+
+  public BlockedOTPKey = ({ email, subject }: RedisOTPType): string => {
+    return `${this.keyPrefixGenerator({
+      purpose: redisPurposeEnum.OTP,
+      identifier: `${email}::${subject}`,
+    })}::blocked`;
+  };
   public revokeTokenGenerator = ({
     jti,
     userId,
@@ -97,7 +105,7 @@ export class RedisService {
   }): Promise<string | null> => {
     try {
       const data = JSON.stringify(value);
-      if (ttl) {
+      if (ttl !== undefined) {
         return await this.redisClient.set(key, data, {
           expiration: { value: ttl, type: "EX" },
         });

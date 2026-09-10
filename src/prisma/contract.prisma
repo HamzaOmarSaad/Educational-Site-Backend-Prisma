@@ -93,12 +93,13 @@ model User {
   phone                  String?
   profilePicture         String?
 
-  changedCredentialsTime DateTime?
-  DeletedAt              DateTime?
-  EmailConfirmedAt       DateTime?
+  changedCredentialsTime TimestamptzString?
+  DeletedAt              TimestamptzString?
+  EmailConfirmedAt       TimestamptzString?
 
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime?
+  createdAt              TimestamptzString         @default(now()) 
+
+  updatedAt              TimestamptzString?        
 
   // Profiles
   teacherProfile         TeacherProfile?
@@ -132,8 +133,8 @@ model TeacherProfile {
   experience     Int?
   qualifications String?
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime?
+  createdAt      TimestamptzString  @default(now())
+  updatedAt      TimestamptzString?
 
   user           User      @relation(fields:[userId], references:[id], onDelete: Cascade)
 }
@@ -152,8 +153,8 @@ model StudentProfile {
 
   parentPhone    String
 
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime?
+  createdAt      TimestamptzString      @default(now())
+  updatedAt      TimestamptzString?
 
   user           User          @relation(fields:[userId], references:[id], onDelete: Cascade)
 
@@ -175,8 +176,8 @@ model Grade {
   name          String
   description   String?
 
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime?
+  createdAt     TimestamptzString         @default(now())
+  updatedAt     TimestamptzString?
 
   students      StudentProfile[]
   courses       Course[]
@@ -196,7 +197,7 @@ model AcademicYear {
   name      String
   year      Int
 
-  createdAt DateTime         @default(now())
+  createdAt TimestamptzString         @default(now())
 
   grade     Grade            @relation(fields:[gradeId], references:[id], onDelete: Cascade)
 
@@ -218,7 +219,7 @@ model Track {
   name           String
   description    String?
 
-  createdAt      DateTime         @default(now())
+  createdAt      TimestamptzString         @default(now())
 
   academicYear   AcademicYear     @relation(fields:[academicYearId], references:[id], onDelete: Cascade)
 
@@ -234,16 +235,16 @@ model Track {
 // SUBJECT
 // ============================================================
 model Subject {
-  id          Uuid     @id @default(uuid())
+  id          Uuid      @id @default(uuid())
   trackId     Uuid
 
   name        String
   description String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime?
+  createdAt   TimestamptzString  @default(now())
+  updatedAt   TimestamptzString?
 
-  track       Track    @relation(fields:[trackId], references:[id], onDelete: Cascade)
+  track       Track     @relation(fields:[trackId], references:[id], onDelete: Cascade)
 
   courses     Course[]
 
@@ -269,8 +270,8 @@ model Course {
 
   status       CourseStatus    @default(DRAFT)
 
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime?
+  createdAt    TimestamptzString        @default(now())
+  updatedAt    TimestamptzString?
 
   teacher      User            @relation(fields:[teacherId], references:[id])
 
@@ -300,8 +301,8 @@ model CourseSection {
   description String?
   order       Int
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime?
+  createdAt   TimestamptzString  @default(now())
+  updatedAt   TimestamptzString?
 
   course      Course    @relation(fields:[courseId], references:[id], onDelete: Cascade)
 
@@ -326,8 +327,8 @@ model Lesson {
   order       Int
   isFree      Boolean            @default(false)
 
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime?
+  createdAt   TimestamptzString           @default(now())
+  updatedAt   TimestamptzString?
 
   section     CourseSection      @relation(fields:[sectionId], references:[id], onDelete: Cascade)
 
@@ -354,8 +355,8 @@ model LessonVideo {
   provider  String?
   videoKey  String?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
+  createdAt TimestamptzString  @default(now())
+  updatedAt TimestamptzString?
 
   lesson    Lesson    @relation(fields:[lessonId], references:[id], onDelete: Cascade)
 }
@@ -373,7 +374,7 @@ model LessonAttachment {
   type      ContentType
   size      Int?
 
-  createdAt DateTime    @default(now())
+  createdAt TimestamptzString    @default(now())
 
   lesson    Lesson      @relation(fields:[lessonId], references:[id], onDelete: Cascade)
 
@@ -391,8 +392,8 @@ model Enrollment {
 
   status      EnrollmentStatus @default(ACTIVE)
 
-  enrolledAt  DateTime         @default(now())
-  completedAt DateTime?
+  enrolledAt  TimestamptzString         @default(now())
+  completedAt TimestamptzString?
 
   student     User             @relation(fields:[studentId], references:[id], onDelete: Cascade)
 
@@ -417,8 +418,8 @@ model LessonProgress {
 
   watchedSeconds Int                  @default(0)
 
-  completedAt    DateTime?
-  updatedAt      DateTime?
+  completedAt    TimestamptzString?
+  updatedAt      TimestamptzString?
 
   student        User                 @relation(fields:[studentId], references:[id], onDelete: Cascade)
 
@@ -443,8 +444,8 @@ model Quiz {
 
   timeLimit    Int?
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime?
+  createdAt    TimestamptzString       @default(now())
+  updatedAt    TimestamptzString?
 
   lesson       Lesson         @relation(fields:[lessonId], references:[id], onDelete: Cascade)
 
@@ -469,7 +470,7 @@ model QuizQuestion {
 
   order     Int
 
-  createdAt DateTime     @default(now())
+  createdAt TimestamptzString     @default(now())
 
   quiz      Quiz         @relation(fields:[quizId], references:[id], onDelete: Cascade)
 
@@ -509,8 +510,8 @@ model QuizAttempt {
   score       Decimal?
   percentage  Decimal?
 
-  startedAt   DateTime     @default(now())
-  completedAt DateTime?
+  startedAt   TimestamptzString     @default(now())
+  completedAt TimestamptzString?
 
   student     User         @relation(fields:[studentId], references:[id], onDelete: Cascade)
 
@@ -554,8 +555,8 @@ model Wallet {
 
   studentId       Uuid                   @unique
 
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime?
+  createdAt       TimestamptzString               @default(now())
+  updatedAt       TimestamptzString?
 
   student         User                   @relation(fields:[studentId], references:[id], onDelete: Cascade)
 
@@ -570,8 +571,8 @@ model TeacherWalletBalance {
 
   balance      Decimal             @default("0")
 
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime?
+  createdAt    TimestamptzString            @default(now())
+  updatedAt    TimestamptzString?
 
   wallet       Wallet              @relation(fields:[walletId], references:[id], onDelete: Cascade)
 
@@ -594,12 +595,12 @@ model Voucher {
 
   status       VoucherStatus      @default(ACTIVE)
 
-  expiresAt    DateTime?
+  expiresAt    TimestamptzString?
 
-  redeemedAt   DateTime?
+  redeemedAt   TimestamptzString?
   redeemedById Uuid?
 
-  createdAt    DateTime           @default(now())
+  createdAt    TimestamptzString           @default(now())
 
   teacher      User               @relation("TeacherVouchers", fields:[teacherId], references:[id])
 
@@ -627,7 +628,7 @@ model WalletTransaction {
 
   description            String?
 
-  createdAt              DateTime              @default(now())
+  createdAt              TimestamptzString              @default(now())
 
   teacherWalletBalance   TeacherWalletBalance  @relation(fields:[teacherWalletBalanceId], references:[id], onDelete: Cascade)
 

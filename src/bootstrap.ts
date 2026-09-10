@@ -1,24 +1,23 @@
+import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
-import { connectDB } from "./prisma/connect";
-import { db } from "./prisma/db";
-import redisService from "./common/services";
+import { Temporal } from "temporal-polyfill";
 import { NotFoundException } from "./common";
+import redisService from "./common/services";
+import { authRouter } from "./modules/auth";
+import { connectDB } from "./prisma/connect";
+(globalThis as any).Temporal = Temporal;
 
 const app: Express = express();
 
 const bootstrap = async () => {
-  app.use(express.json());
+  app.use(express.json(), cors());
   await connectDB();
   await redisService.connectRedisDB();
 
-  app.post("/user", async (req: Request, res: Response, next: NextFunction) => {
-    const user = await db.orm.public.User.create({
-      email: "test@test.com",
-      name: "ass",
-      password: "hamzahamza",
-      role: "TEACHER",
-    });
-    return res.status(200).json({ data: user });
+  app.use("/auth", authRouter);
+
+  app.get("/", async (req: Request, res: Response, next: NextFunction) => {
+    return res.status(200).json({ data: "hello" });
   });
   app.all("{/*dummy}", (req: Request, res: Response, next: NextFunction) => {
     throw new NotFoundException("invalid URL");
