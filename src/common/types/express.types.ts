@@ -17,3 +17,5 @@ export interface IAuthUser {
 export interface IAuthSocket extends Socket {
   data: IAuthUser;
 }
+
+export type IFile = Express.Multer.File;

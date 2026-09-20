@@ -2,14 +2,16 @@ import type { Request } from "express";
 import multer from "multer";
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
-
 import type { FileFilterCallback } from "multer";
+
 import { badRequestException } from "../res";
 import { storageApproachEnum } from "../../Enums/multer.enum";
 
 export const fileFieldValidation = {
   image: ["image/png", "image/jpg", "image/jpeg"],
-  video: ["video/mp4", "video/webm"],
+
+  video: ["video/mp4", "video/webm", "video/quicktime", "video/x-matroska"],
+  file: ["file/pdf ,file/pptx ,file/docx"],
 };
 
 export const fileFilter = (validation: string[]) => {
@@ -42,7 +44,7 @@ export const cloudFileUpload = ({
   maxSize?: number;
 }) => {
   const storage =
-    storageApproach == storageApproachEnum.MEMO
+    storageApproach === storageApproachEnum.MEMO
       ? multer.memoryStorage()
       : multer.diskStorage({
           filename(
@@ -52,6 +54,7 @@ export const cloudFileUpload = ({
           ) {
             callback(null, `${randomUUID()}__${file.originalname}`);
           },
+
           destination(
             req: Request,
             file: Express.Multer.File,
@@ -60,9 +63,13 @@ export const cloudFileUpload = ({
             callback(null, tmpdir());
           },
         });
+
   return multer({
     fileFilter: fileFilter(validation),
     storage,
-    limits: { fileSize: maxSize * 1024 * 1024 },
+
+    limits: {
+      fileSize: maxSize * 1024 * 1024,
+    },
   });
 };

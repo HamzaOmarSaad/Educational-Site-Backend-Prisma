@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import redisService from "../common/services";
+import { redisService } from "../common/services";
 
 export const cachingMiddleware = (personal: boolean, ttl = 60) => {
   return async (req: Request, res: Response, next: NextFunction) => {

@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["adminsdk", "eduleb", "Edusite", "FCMs"]
+  "cSpell.words": [
+    "adminsdk",
+    "eduleb",
+    "Edusite",
+    "FCMs",
+    "streamifier",
+    "Timestamptz"
+  ]
 }

@@ -55,6 +55,10 @@ export {
 } from "./lesson-progress.repository";
 export { default as quizRepository, QuizRepository } from "./quiz.repository";
 export {
+  default as subscriptionRepository,
+  SubscriptionRepository,
+} from "./subscription.repository";
+export {
   default as quizQuestionRepository,
   QuizQuestionRepository,
 } from "./quiz-question.repository";

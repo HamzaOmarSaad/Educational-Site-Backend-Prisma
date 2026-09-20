@@ -10,7 +10,7 @@ import {
 type RequestKey = keyof Request;
 type SchemaType = Partial<Record<RequestKey, z.ZodTypeAny>>;
 
-export const validationMiddleware = (schema: SchemaType) => {
+export const validate = (schema: SchemaType) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const issues: ZodIssue[] = [];
 

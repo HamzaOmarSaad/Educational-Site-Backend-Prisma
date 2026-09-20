@@ -7,3 +7,8 @@ export enum redisPurposeEnum {
   OTP = "OTP",
   revokeToken = "revokeToken",
 }
+
+export enum logoutType {
+  allDevices = "all",
+  oneDevice = "one",
+}

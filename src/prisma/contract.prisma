@@ -33,6 +33,13 @@ enum EnrollmentStatus {
   COMPLETED
   CANCELLED
 }
+enum SubscriptionStatus {
+  @@type("pg/text@1")
+
+  PENDING
+  APPROVED
+  CANCELLED
+}
 
 enum LessonProgressStatus {
   @@type("pg/text@1")
@@ -79,6 +86,7 @@ enum WalletTransactionType {
   ADJUSTMENT
 }
 
+
 // ============================================================
 // USER
 // ============================================================
@@ -108,15 +116,20 @@ model User {
   // Teacher relationships
   courses                Course[]
 
+
   // Student relationships
   enrollments            Enrollment[]
   progress               LessonProgress[]
   quizAttempts           QuizAttempt[]
 
+
   wallet                 Wallet?
 
   vouchersCreated        Voucher[]        @relation("TeacherVouchers")
   vouchersRedeemed       Voucher[]        @relation("VoucherRedemption")
+
+  subscribedStudents Subscription[] @relation("StudentSubscriptions")
+  teacherSubscribed  Subscription[] @relation("TeacherSubscriptions")
 
   @@index([role])
 }
@@ -127,16 +140,20 @@ model User {
 model TeacherProfile {
   id             Uuid      @id @default(uuid())
   userId         Uuid      @unique
+    subjectId    Uuid
 
   bio            String?
   specialization String?
   experience     Int?
   qualifications String?
 
+
   createdAt      TimestamptzString  @default(now())
   updatedAt      TimestamptzString?
 
   user           User      @relation(fields:[userId], references:[id], onDelete: Cascade)
+  subject      Subject         @relation(fields:[subjectId], references:[id])
+
 }
 
 // ============================================================
@@ -168,6 +185,19 @@ model StudentProfile {
   @@index([trackId])
 }
 
+model Subscription {
+  id        Uuid @id @default(uuid())
+
+  studentId Uuid
+  teacherId Uuid
+
+  status  SubscriptionStatus @default(PENDING)
+
+  student User @relation("StudentSubscriptions", fields: [studentId], references: [id])
+  teacher User @relation("TeacherSubscriptions", fields: [teacherId], references: [id])
+
+  createdAt TimestamptzString @default(now())
+}
 // ============================================================
 // GRADE
 // ============================================================
@@ -551,14 +581,13 @@ model QuizAnswer {
 
 // ============================================================
 model Wallet {
-  id              Uuid                   @id @default(uuid())
+  id         Uuid      @id @default(uuid())
+  studentId  Uuid      @unique
 
-  studentId       Uuid                   @unique
+  createdAt  TimestamptzString @default(now())
+  updatedAt  TimestamptzString?
 
-  createdAt       TimestamptzString               @default(now())
-  updatedAt       TimestamptzString?
-
-  student         User                   @relation(fields:[studentId], references:[id], onDelete: Cascade)
+  student User  @relation(fields:[studentId], references:[id], onDelete: Cascade)
 
   teacherBalances TeacherWalletBalance[]
 }
@@ -606,7 +635,7 @@ model Voucher {
 
   redeemedBy   User?              @relation("VoucherRedemption", fields:[redeemedById], references:[id])
 
-  transaction  WalletTransaction?
+  TeacherWalletTransaction WalletTransaction?
 
   @@index([teacherId])
   @@index([status])

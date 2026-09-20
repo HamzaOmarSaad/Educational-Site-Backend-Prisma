@@ -1,26 +1,30 @@
 import { NextFunction, Request, Response, Router } from "express";
-import routes from "./auth.routes";
-import authService from "./auth.service";
+import { successResult } from "../../common";
+import { validate } from "../../middlewares/validation.middleware";
 import {
   confirmEmailDTo,
   ILoginDTO,
   ISignupDTO,
   resendEmailDTO,
 } from "./auth.dto";
-import { successResult } from "../../common";
-import { validationMiddleware } from "../../middlewares/validation.middleware";
+import routes from "./auth.routes";
+import authService from "./auth.service";
 import {
   confirmEmailSchema,
   loginSchema,
+  adminLoginSchema,
+  teacherLoginSchema,
   resendEmailSchema,
   signupSchema,
 } from "./auth.validation";
+import { badRequestException } from "../../common";
+import { UserRole } from "../../interfaces";
 
 const router = Router();
 
 router.post(
   routes.signup,
-  validationMiddleware(signupSchema),
+  validate(signupSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await authService.signup(req.body as ISignupDTO);
     return successResult({
@@ -33,7 +37,7 @@ router.post(
 );
 router.post(
   routes.login,
-  validationMiddleware(loginSchema),
+  validate(loginSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await authService.login(
       req.body as ILoginDTO,
@@ -47,9 +51,49 @@ router.post(
     });
   },
 );
+
+router.post(
+  routes.adminLogin,
+  validate(adminLoginSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const data = await authService.login(
+      req.body as ILoginDTO,
+      `${req.protocol}://${req.host}`,
+    );
+    if (!data.user || data.user.role !== UserRole.ADMIN) {
+      throw new badRequestException("invalid credentials for admin");
+    }
+    return successResult({
+      res,
+      message: "admin logged in successfully",
+      data,
+      statusCode: 200,
+    });
+  },
+);
+
+router.post(
+  routes.teacherLogin,
+  validate(teacherLoginSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const data = await authService.login(
+      req.body as ILoginDTO,
+      `${req.protocol}://${req.host}`,
+    );
+    if (!data.user || data.user.role !== UserRole.TEACHER) {
+      throw new badRequestException("invalid credentials for teacher");
+    }
+    return successResult({
+      res,
+      message: "teacher logged in successfully",
+      data,
+      statusCode: 200,
+    });
+  },
+);
 router.post(
   routes.confirmEmail,
-  validationMiddleware(confirmEmailSchema),
+  validate(confirmEmailSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await authService.confirmEmail(req.body as confirmEmailDTo);
     return successResult({
@@ -62,7 +106,7 @@ router.post(
 );
 router.post(
   routes.resendEmail,
-  validationMiddleware(resendEmailSchema),
+  validate(resendEmailSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await authService.resendEmail(req.body as resendEmailDTO);
     return successResult({

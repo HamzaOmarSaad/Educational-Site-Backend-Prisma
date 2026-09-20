@@ -3,7 +3,7 @@ import { NextFunction, Response, Request } from "express";
 import { MapGraphQLError, unauthorizedException } from "../common";
 
 export const authorize = (roles: UserRole[] = []) => {
-  async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req?.user?.role)) {
       throw new unauthorizedException(" not authorized user ");
     }

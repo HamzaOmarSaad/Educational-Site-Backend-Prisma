@@ -10,6 +10,8 @@ export const loginSchema = {
     FCM: z.string().optional(),
   }),
 };
+export const adminLoginSchema = loginSchema;
+export const teacherLoginSchema = loginSchema;
 export const signupSchema = {
   body: loginSchema.body
     .safeExtend({

@@ -3,8 +3,6 @@ import nodemailer from "nodemailer";
 import { badRequestException } from "../res";
 import { hashService, verifyHashService } from "../security";
 
-import { userRepository, UserRepository } from "../../repositories";
-
 import redisService from "../services/redis.service";
 
 import { emailEnum } from "../../Enums";
@@ -30,11 +28,9 @@ const OTP_TTL = 3 * 60;
 const OTP_COOLDOWN_TTL = 60;
 
 export class EmailService {
-  private userRepository: UserRepository;
   private redis: typeof redisService;
 
   constructor() {
-    this.userRepository = userRepository;
     this.redis = redisService;
   }
 
@@ -136,18 +132,18 @@ export class EmailService {
     return true;
   }
 
-  public async confirmEmail(email: string, otp: string): Promise<boolean> {
-    const subject = emailEnum.confirmEmail;
-
+  public async verifyOTP(
+    email: string,
+    otp: string,
+    subject: emailEnum,
+  ): Promise<boolean> {
     // 1. Check if blocked
     await checkBlockedOTP(email, subject);
-
     // 2. Get OTP key
     const otpKey = this.redis.OTPKey({
       email,
       subject,
     });
-
     // 3. Get hashed OTP
     const hashedOTP = await this.redis.getValue<string>(otpKey);
 
@@ -155,36 +151,13 @@ export class EmailService {
       throw new badRequestException("OTP is invalid or expired.");
     }
 
-    // 4. Check user
-    const account = await this.userRepository.findOne({
-      email,
-      EmailConfirmedAt: null,
-    });
-
-    if (!account) {
-      throw new badRequestException("Email not found or already confirmed.");
-    }
-
     // 5. Compare OTP
     const isMatch = await verifyHashService(otp, hashedOTP);
 
     if (!isMatch) {
       await registerWrongOTPAttempt(email, subject);
-
       throw new badRequestException("Wrong OTP.");
     }
-
-    // 6. Confirm email
-    await this.userRepository.update({
-      where: {
-        email,
-      },
-
-      update: {
-        EmailConfirmedAt: new Date(),
-      },
-    });
-
     // 7. Delete OTP
     await this.redis.deleteValue({
       key: otpKey,
@@ -192,26 +165,6 @@ export class EmailService {
 
     // 8. Clear failed attempts
     await clearOTPAttempts(email, subject);
-
-    return true;
-  }
-
-  public async resendEmail(email: string): Promise<boolean> {
-    // Check account
-    const account = await this.userRepository.findOne({
-      email,
-      EmailConfirmedAt: null,
-    });
-
-    if (!account) {
-      throw new badRequestException("Email not found or already confirmed.");
-    }
-
-    await this.sendEmailOTP({
-      email,
-      subject: emailEnum.confirmEmail,
-      title: "Email Confirmation",
-    });
 
     return true;
   }

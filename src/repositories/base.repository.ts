@@ -1,17 +1,15 @@
-import { Collection, DefaultModelRow } from "@prisma/orm-postgres/orm-client";
+import {
+  Collection,
+  DefaultModelRow,
+  RelationNames,
+} from "@prisma/orm-postgres/orm-client";
 
 import { db } from "../prisma/db";
 
 import type { Contract } from "../prisma/contract";
 
-/**
- * Generic base repository shared by all model repositories.
- *
- * TName must be a valid model name key on the Contract's "public" schema
- * (e.g. "User", "Course", "Enrollment", ...).
- */
 export abstract class BaseRepository<TName extends string> {
-  protected readonly model: ModelCollection<TName>;
+  public readonly model: ModelCollection<TName>;
 
   constructor(modelName: TName) {
     this.model = (db.orm.public as any)[modelName];
@@ -23,6 +21,12 @@ export abstract class BaseRepository<TName extends string> {
 
   async findOne(where: WhereInput<TName>) {
     return this.model.where(where).first();
+  }
+  async findOneJoined(
+    where: WhereInput<TName>,
+    include: RelationNames<Contract, TName, never>,
+  ) {
+    return this.model.where(where).include(include).first();
   }
 
   async findAll() {

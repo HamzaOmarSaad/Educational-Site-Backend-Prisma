@@ -1,6 +1,6 @@
 import { emailEnum } from "../../Enums";
 import { badRequestException } from "../res";
-import redisService from "../services";
+import { redisService } from "../services";
 
 const MAX_OTP_ATTEMPTS = 3;
 const ATTEMPTS_TTL = 5 * 60;

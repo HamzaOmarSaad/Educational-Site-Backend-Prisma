@@ -1,0 +1,269 @@
+{
+  "info": {
+    "_postman_id": "educational-site-backend-prisma-collection",
+    "name": "Educational Site Backend Prisma",
+    "description": "Postman collection for Educational Site Backend (Prisma)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Passw0rd!\",\n  \"rePassword\": \"Passw0rd!\",\n  \"phone\": \"+1234567890\",\n  \"parentPhone\": \"+1234567890\",\n  \"school\": \"Example School\",\n  \"grade\": \"GRADE1\",\n  \"track\": \"TRACK_A\",\n  \"gender\": \"MALE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Passw0rd!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin-login"]
+            }
+          }
+        },
+        {
+          "name": "Teacher Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"teacher@example.com\",\n  \"password\": \"TeacherPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/teacher-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "teacher-login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get Student Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/student-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "student-profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course",
+      "item": [
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"Intro to Math\", \"price\": 100 }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/course/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["course", "create"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Teacher (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "name", "value": "Ms Teacher" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/create-teacher",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "create-teacher"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollment",
+      "item": [
+        {
+          "name": "Enroll Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/enrollment/enroll-course/:courseId",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollment", "enroll-course", ":courseId"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lesson",
+      "item": [
+        {
+          "name": "Create Lesson Video",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "video", "type": "file" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lesson/create-lesson-video",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson", "create-lesson-video"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Create Voucher",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"amount\": 50 }" },
+            "url": {
+              "raw": "{{baseUrl}}/payment/create-voucher",
+              "host": ["{{baseUrl}}"],
+              "path": ["payment", "create-voucher"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quiz",
+      "item": [
+        {
+          "name": "Create Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"lessonId\": \"<uuid>\", \"title\": \"Sample Quiz\", \"questions\": [] }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quiz/create-quiz",
+              "host": ["{{baseUrl}}"],
+              "path": ["quiz", "create-quiz"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teacher",
+      "item": [
+        {
+          "name": "Get Subscribed Students",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/teacher/subscribed-students",
+              "host": ["{{baseUrl}}"],
+              "path": ["teacher", "subscribed-students"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" }
+  ]
+}

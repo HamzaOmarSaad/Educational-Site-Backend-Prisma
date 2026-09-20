@@ -19,10 +19,13 @@ export const generalValidationFields = {
         fieldname: z.string(),
         originalname: z.string(),
         encoding: z.string(),
-        path: z.string().optional(),
-        buffer: z.any().optional(),
+        path: z.string(),
+        buffer: z.any(),
         size: z.number(),
         mimetype: z.enum(mimetype),
+        destination: z.string(),
+        filename: z.string(),
+        stream: z.any(),
       })
       .superRefine((args, ctx) => {
         if (!args.path && !args.buffer) {
