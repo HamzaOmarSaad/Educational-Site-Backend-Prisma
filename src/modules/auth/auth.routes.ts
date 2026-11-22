@@ -1,7 +1,7 @@
 const routes = {
   login: "/login",
-  adminLogin: "/admin-login",
-  teacherLogin: "/teacher-login",
+  adminLogin: "/login/admin",
+  teacherLogin: "/login/teacher",
   signup: "/signup",
   confirmEmail: "/confirm-email",
   resendEmail: "/resend-email",

@@ -80,6 +80,10 @@
       "model": "TeacherWalletBalance",
       "namespace": "public"
     },
+    "teaches": {
+      "model": "Teaches",
+      "namespace": "public"
+    },
     "track": {
       "model": "Track",
       "namespace": "public"
@@ -2447,13 +2451,6 @@
                   "kind": "scalar"
                 }
               },
-              "subjectId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/uuid@1",
-                  "kind": "scalar"
-                }
-              },
               "updatedAt": {
                 "nullable": true,
                 "type": {
@@ -2470,21 +2467,6 @@
               }
             },
             "relations": {
-              "subject": {
-                "cardinality": "N:1",
-                "on": {
-                  "localFields": [
-                    "subjectId"
-                  ],
-                  "targetFields": [
-                    "id"
-                  ]
-                },
-                "to": {
-                  "model": "Subject",
-                  "namespace": "public"
-                }
-              },
               "user": {
                 "cardinality": "N:1",
                 "on": {
@@ -2520,9 +2502,6 @@
                 },
                 "specialization": {
                   "column": "specialization"
-                },
-                "subjectId": {
-                  "column": "subjectId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -2650,6 +2629,88 @@
               },
               "namespaceId": "public",
               "table": "teacherWalletBalance"
+            }
+          },
+          "Teaches": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "subjectId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "teacherId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "Teacher": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "teacherId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "subject": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "subjectId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Subject",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "subjectId": {
+                  "column": "subjectId"
+                },
+                "teacherId": {
+                  "column": "teacherId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "teaches"
             }
           },
           "Track": {
@@ -2838,6 +2899,13 @@
                 }
               },
               "profilePicture": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "profilePicturePublic_id": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -3066,6 +3134,9 @@
                 },
                 "profilePicture": {
                   "column": "profilePicture"
+                },
+                "profilePicturePublic_id": {
+                  "column": "profilePicturePublic_id"
                 },
                 "role": {
                   "column": "role"
@@ -5238,11 +5309,6 @@
                   "nativeType": "text",
                   "nullable": true
                 },
-                "subjectId": {
-                  "codecId": "pg/uuid@1",
-                  "nativeType": "uuid",
-                  "nullable": false
-                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -5271,34 +5337,9 @@
                     "namespaceId": "public",
                     "tableName": "user"
                   }
-                },
-                {
-                  "source": {
-                    "columns": [
-                      "subjectId"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "teacherProfile"
-                  },
-                  "target": {
-                    "columns": [
-                      "id"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "subject"
-                  }
                 }
               ],
-              "indexes": [
-                {
-                  "columns": [
-                    "subjectId"
-                  ],
-                  "name": "teacherProfile_subjectId_idx_84df2a1d",
-                  "prefix": "teacherProfile_subjectId_idx",
-                  "unique": false
-                }
-              ],
+              "indexes": [],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -5419,6 +5460,92 @@
                   ]
                 }
               ]
+            },
+            "teaches": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
+                "subjectId": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
+                "teacherId": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "teacherId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "teaches"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "subjectId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "teaches"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "subject"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "subjectId"
+                  ],
+                  "name": "teaches_subjectId_idx_84df2a1d",
+                  "prefix": "teaches_subjectId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "teacherId"
+                  ],
+                  "name": "teaches_teacherId_idx_bc266660",
+                  "prefix": "teaches_teacherId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
             },
             "track": {
               "columns": {
@@ -5570,6 +5697,11 @@
                   "nullable": true
                 },
                 "profilePicture": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "profilePicturePublic_id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -6048,10 +6180,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "ef25504a31b630bf73f42f1fcffa75c06d91f05dc162945e6bc8781e4ec58513"
+    "storageHash": "a7569ef90749f4e2f2d0d5cbeac7621dc0689392f75af4589bfb2b950e6a137f"
   },
   "execution": {
-    "executionHash": "86c722bffe0d814f10053a312d89c29e53402136877fe52b75714eeae96935e6",
+    "executionHash": "9c5b1c4c1ba322577ff0c65281f118dc7955cce0ac69518c3cebc71d52854099",
     "mutations": {
       "defaults": [
         {
@@ -6261,6 +6393,17 @@
             "column": "id",
             "namespace": "public",
             "table": "teacherWalletBalance"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "teaches"
           }
         },
         {

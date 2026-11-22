@@ -15,17 +15,17 @@ export const generalValidationFields = {
     ),
   file: function (mimetype: string[]) {
     return z
-      .strictObject({
+      .object({
         fieldname: z.string(),
         originalname: z.string(),
         encoding: z.string(),
-        path: z.string(),
-        buffer: z.any(),
+        path: z.string().optional(),
+        buffer: z.any().optional(),
         size: z.number(),
         mimetype: z.enum(mimetype),
-        destination: z.string(),
-        filename: z.string(),
-        stream: z.any(),
+        destination: z.string().optional(),
+        filename: z.string().optional(),
+        stream: z.any().optional(),
       })
       .superRefine((args, ctx) => {
         if (!args.path && !args.buffer) {

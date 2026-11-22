@@ -3,7 +3,7 @@ import { auth, authorize, validate } from "../../middlewares";
 import { UserRole } from "../../interfaces";
 import paymentService from "./payment.service";
 import { successResult } from "../../common";
-import { createVoucherSchema } from "./payment.validation";
+import { createVoucherSchema, redeemVoucherSchema } from "./payment.validation";
 import { createVoucherDto, redeemVoucherDto } from "./payment.dto";
 
 const router = Router();
@@ -28,7 +28,7 @@ router.post(
   "/redeem-voucher",
   auth(),
   authorize([UserRole.STUDENT]),
-  validate(createVoucherSchema),
+  validate(redeemVoucherSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await paymentService.redeemVoucher(
       req.body as redeemVoucherDto,

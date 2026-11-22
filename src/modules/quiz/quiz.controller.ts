@@ -9,6 +9,16 @@ import { CreateQuizDTO, startQuizParamsDTO, SubmitQuizDTO } from "./quiz.dto";
 
 const router = Router();
 
+router.get(
+  "/:quizId",
+  auth(),
+  authorize([UserRole.STUDENT]),
+  async (req: Request, res: Response) => {
+    const data = await quizService.getQuiz(req.params.quizId as string);
+    return successResult({ res, data, message: "quiz retrieved", statusCode: 200 });
+  },
+);
+
 router.post(
   "/create-quiz",
   auth(),

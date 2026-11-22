@@ -100,6 +100,7 @@ model User {
 
   phone                  String?
   profilePicture         String?
+  profilePicturePublic_id         String?
 
   changedCredentialsTime TimestamptzString?
   DeletedAt              TimestamptzString?
@@ -140,7 +141,6 @@ model User {
 model TeacherProfile {
   id             Uuid      @id @default(uuid())
   userId         Uuid      @unique
-    subjectId    Uuid
 
   bio            String?
   specialization String?
@@ -152,8 +152,19 @@ model TeacherProfile {
   updatedAt      TimestamptzString?
 
   user           User      @relation(fields:[userId], references:[id], onDelete: Cascade)
-  subject      Subject         @relation(fields:[subjectId], references:[id])
 
+}
+
+model Teaches {
+  id        Uuid @id @default(uuid())
+
+  subjectId Uuid
+  teacherId Uuid
+
+  Teacher User @relation(fields: [teacherId], references: [id])
+  subject  Subject  @relation( fields: [subjectId], references: [id])
+
+  createdAt TimestamptzString @default(now())
 }
 
 // ============================================================

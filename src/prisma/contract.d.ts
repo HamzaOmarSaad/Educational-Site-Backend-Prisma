@@ -33,9 +33,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'ef25504a31b630bf73f42f1fcffa75c06d91f05dc162945e6bc8781e4ec58513'>;
+  StorageHashBase<'a7569ef90749f4e2f2d0d5cbeac7621dc0689392f75af4589bfb2b950e6a137f'>;
 export type ExecutionHash =
-  ExecutionHashBase<'86c722bffe0d814f10053a312d89c29e53402136877fe52b75714eeae96935e6'>;
+  ExecutionHashBase<'9c5b1c4c1ba322577ff0c65281f118dc7955cce0ac69518c3cebc71d52854099'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -399,7 +399,6 @@ export type FieldOutputTypes = {
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly userId: CodecTypes['pg/uuid@1']['output'];
-      readonly subjectId: CodecTypes['pg/uuid@1']['output'];
       readonly bio: CodecTypes['pg/text@1']['output'] | null;
       readonly specialization: CodecTypes['pg/text@1']['output'] | null;
       readonly experience: CodecTypes['pg/int4@1']['output'] | null;
@@ -414,6 +413,12 @@ export type FieldOutputTypes = {
       readonly balance: CodecTypes['pg/numeric@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    };
+    readonly Teaches: {
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly subjectId: CodecTypes['pg/uuid@1']['output'];
+      readonly teacherId: CodecTypes['pg/uuid@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly Track: {
       readonly id: CodecTypes['pg/uuid@1']['output'];
@@ -431,6 +436,7 @@ export type FieldOutputTypes = {
       readonly gender: 'MALE' | 'FEMALE';
       readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly profilePicture: CodecTypes['pg/text@1']['output'] | null;
+      readonly profilePicturePublic_id: CodecTypes['pg/text@1']['output'] | null;
       readonly changedCredentialsTime: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly DeletedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly EmailConfirmedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
@@ -627,7 +633,6 @@ export type FieldInputTypes = {
     readonly TeacherProfile: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly userId: CodecTypes['pg/uuid@1']['input'];
-      readonly subjectId: CodecTypes['pg/uuid@1']['input'];
       readonly bio: CodecTypes['pg/text@1']['input'] | null;
       readonly specialization: CodecTypes['pg/text@1']['input'] | null;
       readonly experience: CodecTypes['pg/int4@1']['input'] | null;
@@ -642,6 +647,12 @@ export type FieldInputTypes = {
       readonly balance: CodecTypes['pg/numeric@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+    };
+    readonly Teaches: {
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly subjectId: CodecTypes['pg/uuid@1']['input'];
+      readonly teacherId: CodecTypes['pg/uuid@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly Track: {
       readonly id: CodecTypes['pg/uuid@1']['input'];
@@ -659,6 +670,7 @@ export type FieldInputTypes = {
       readonly gender: 'MALE' | 'FEMALE';
       readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly profilePicture: CodecTypes['pg/text@1']['input'] | null;
+      readonly profilePicturePublic_id: CodecTypes['pg/text@1']['input'] | null;
       readonly changedCredentialsTime: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly DeletedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly EmailConfirmedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
@@ -859,7 +871,6 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly qualifications: CodecTypes['pg/text@1']['output'] | null;
       readonly specialization: CodecTypes['pg/text@1']['output'] | null;
-      readonly subjectId: CodecTypes['pg/uuid@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['output'];
     };
@@ -870,6 +881,12 @@ export type StorageColumnTypes = {
       readonly teacherId: CodecTypes['pg/uuid@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly walletId: CodecTypes['pg/uuid@1']['output'];
+    };
+    readonly teaches: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly subjectId: CodecTypes['pg/uuid@1']['output'];
+      readonly teacherId: CodecTypes['pg/uuid@1']['output'];
     };
     readonly track: {
       readonly academicYearId: CodecTypes['pg/uuid@1']['output'];
@@ -890,6 +907,7 @@ export type StorageColumnTypes = {
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly profilePicture: CodecTypes['pg/text@1']['output'] | null;
+      readonly profilePicturePublic_id: CodecTypes['pg/text@1']['output'] | null;
       readonly role: 'STUDENT' | 'TEACHER' | 'ADMIN';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
     };
@@ -1087,7 +1105,6 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly qualifications: CodecTypes['pg/text@1']['input'] | null;
       readonly specialization: CodecTypes['pg/text@1']['input'] | null;
-      readonly subjectId: CodecTypes['pg/uuid@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['input'];
     };
@@ -1098,6 +1115,12 @@ export type StorageColumnInputTypes = {
       readonly teacherId: CodecTypes['pg/uuid@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly walletId: CodecTypes['pg/uuid@1']['input'];
+    };
+    readonly teaches: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly subjectId: CodecTypes['pg/uuid@1']['input'];
+      readonly teacherId: CodecTypes['pg/uuid@1']['input'];
     };
     readonly track: {
       readonly academicYearId: CodecTypes['pg/uuid@1']['input'];
@@ -1118,6 +1141,7 @@ export type StorageColumnInputTypes = {
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly profilePicture: CodecTypes['pg/text@1']['input'] | null;
+      readonly profilePicturePublic_id: CodecTypes['pg/text@1']['input'] | null;
       readonly role: 'STUDENT' | 'TEACHER' | 'ADMIN';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
     };
@@ -2483,11 +2507,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
                 };
-                readonly subjectId: {
-                  readonly nativeType: 'uuid';
-                  readonly codecId: 'pg/uuid@1';
-                  readonly nullable: false;
-                };
                 readonly bio: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -2522,14 +2541,7 @@ type ContractBase = Omit<
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['userId'] }];
-              indexes: readonly [
-                {
-                  readonly name: 'teacherProfile_subjectId_idx_84df2a1d';
-                  readonly prefix: 'teacherProfile_subjectId_idx';
-                  readonly columns: readonly ['subjectId'];
-                  readonly unique: false;
-                },
-              ];
+              indexes: readonly [];
               foreignKeys: readonly [
                 {
                   readonly source: {
@@ -2540,18 +2552,6 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'user';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'teacherProfile';
-                    readonly columns: readonly ['subjectId'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'subject';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -2633,6 +2633,73 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'user';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly teaches: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                };
+                readonly subjectId: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                };
+                readonly teacherId: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'teaches_teacherId_idx_bc266660';
+                  readonly prefix: 'teaches_teacherId_idx';
+                  readonly columns: readonly ['teacherId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'teaches_subjectId_idx_84df2a1d';
+                  readonly prefix: 'teaches_subjectId_idx';
+                  readonly columns: readonly ['subjectId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'teaches';
+                    readonly columns: readonly ['teacherId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'user';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'teaches';
+                    readonly columns: readonly ['subjectId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'subject';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -2730,6 +2797,11 @@ type ContractBase = Omit<
                   readonly nullable: true;
                 };
                 readonly profilePicture: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly profilePicturePublic_id: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
@@ -3078,6 +3150,7 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'TeacherProfile';
     };
+    readonly teaches: { readonly namespace: 'public' & NamespaceId; readonly model: 'Teaches' };
     readonly studentProfile: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'StudentProfile';
@@ -4495,10 +4568,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly subjectId: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
-              };
               readonly bio: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -4531,17 +4600,6 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
-              readonly subject: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Subject';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['subjectId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
@@ -4557,7 +4615,6 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly id: { readonly column: 'id' };
                 readonly userId: { readonly column: 'userId' };
-                readonly subjectId: { readonly column: 'subjectId' };
                 readonly bio: { readonly column: 'bio' };
                 readonly specialization: { readonly column: 'specialization' };
                 readonly experience: { readonly column: 'experience' };
@@ -4642,6 +4699,60 @@ type ContractBase = Omit<
                 readonly balance: { readonly column: 'balance' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly Teaches: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly subjectId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly teacherId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly Teacher: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['teacherId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly subject: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Subject';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['subjectId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'teaches';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly subjectId: { readonly column: 'subjectId' };
+                readonly teacherId: { readonly column: 'teacherId' };
+                readonly createdAt: { readonly column: 'createdAt' };
               };
             };
           };
@@ -4749,6 +4860,10 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly profilePicture: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly profilePicturePublic_id: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
@@ -4923,6 +5038,7 @@ type ContractBase = Omit<
                 readonly gender: { readonly column: 'gender' };
                 readonly phone: { readonly column: 'phone' };
                 readonly profilePicture: { readonly column: 'profilePicture' };
+                readonly profilePicturePublic_id: { readonly column: 'profilePicturePublic_id' };
                 readonly changedCredentialsTime: { readonly column: 'changedCredentialsTime' };
                 readonly DeletedAt: { readonly column: 'DeletedAt' };
                 readonly EmailConfirmedAt: { readonly column: 'EmailConfirmedAt' };
@@ -5424,6 +5540,14 @@ type ContractBase = Omit<
           readonly ref: {
             readonly namespace: 'public';
             readonly table: 'teacherWalletBalance';
+            readonly column: 'id';
+          };
+          readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };
+        },
+        {
+          readonly ref: {
+            readonly namespace: 'public';
+            readonly table: 'teaches';
             readonly column: 'id';
           };
           readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };

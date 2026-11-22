@@ -82,6 +82,7 @@ export class LessonService {
     }
     let url!: string;
     if (file) {
+      if (!file.path) throw new badRequestException("Uploaded video file is missing its stored path");
       const uploadedFile = await this.cloudinary.uploadVideo({
         filePath: file.path,
         folder: `lesson/${lesson.id}/video`,
@@ -123,7 +124,7 @@ export class LessonService {
     if (!lesson) throw new badRequestException("fail");
 
     const uploadedFile = await this.s3.uploadAsset({
-      file,
+      file: file as Express.Multer.File,
       path: `Lessons/${lesson.id}/attachments`,
     });
 

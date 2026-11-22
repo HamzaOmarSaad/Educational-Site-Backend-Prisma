@@ -29,7 +29,6 @@ export const auth = (tokenType: TokenType = tokenTypeEnum.access) => {
     });
     req.user = user;
     req.decoded = decoded;
-    console.log("user authorized ", user.name);
 
     next();
   };

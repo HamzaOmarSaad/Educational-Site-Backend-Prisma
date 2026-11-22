@@ -10,7 +10,7 @@ const router = Router();
 router.post(
   "/enroll-course/:courseId",
   auth(),
-  authorize([UserRole.TEACHER, UserRole.ADMIN]),
+  authorize([UserRole.STUDENT]),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await enrollmentService.enrollCourse(
       req.params as enrollCourseDTO,

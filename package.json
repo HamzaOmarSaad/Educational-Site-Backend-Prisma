@@ -17,6 +17,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "contract:emit": "prisma contract emit",
+    "seed:demo": "node scripts/seed-demo.js",
     "start:dev": "node --env-file=.env --watch ./dist/index.js",
     "start:prod": "cross-env NODE_ENV=production pm2 start ./src/bootstrap.ts -i 0",
     "start:build": "tsc -w"

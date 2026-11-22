@@ -17,11 +17,12 @@ router.post(
   "/create-lesson-video",
   auth(),
   authorize([UserRole.TEACHER]),
-  validate(createLessonVideoSchema),
   cloudFileUpload({
     storageApproach: storageApproachEnum.DESK,
     validation: fileFieldValidation.video,
+    maxSize: 100,
   }).single("video"),
+  validate(createLessonVideoSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await lessonService.createLessonVideo({
       ...req.body,
@@ -39,11 +40,11 @@ router.post(
   "/create-lesson-attachment",
   auth(),
   authorize([UserRole.TEACHER]),
-  validate(createLessonAttachmentsSchema),
   cloudFileUpload({
     storageApproach: storageApproachEnum.DESK,
     validation: fileFieldValidation.file,
   }).single("attachment"),
+  validate(createLessonAttachmentsSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await lessonService.createLessonAttachment({
       ...req.body,

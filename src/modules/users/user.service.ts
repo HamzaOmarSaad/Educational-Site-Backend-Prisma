@@ -1,10 +1,21 @@
+import gradeRepository, {
+  GradeRepository,
+} from "./../../repositories/grade.repository";
+import academicYearRepository, {
+  AcademicYearRepository,
+} from "./../../repositories/academic-year.repository";
+import trackRepository, {
+  TrackRepository,
+} from "./../../repositories/track.repository";
+import courseRepository, {
+  CourseRepository,
+} from "./../../repositories/course.repository";
 import {
   badRequestException,
   s3Service,
   S3Service,
   encryptService,
 } from "../../common";
-import { UserRole } from "../../interfaces";
 import {
   subscriptionRepository,
   studentProfileRepository as spRepository,
@@ -26,6 +37,10 @@ export class UserService {
   private subscriptionRepository: SubscriptionRepository;
   private walletRepository: WalletRepository;
   private TeacherWalletRepository: TeacherWalletBalanceRepository;
+  private courseRepository: CourseRepository;
+  private trackRepository: TrackRepository;
+  private gradeRepository: GradeRepository;
+  private academicYearRepository: AcademicYearRepository;
   private s3: S3Service;
 
   constructor() {
@@ -34,6 +49,10 @@ export class UserService {
     this.subscriptionRepository = subscriptionRepository;
     this.walletRepository = walletRepository;
     this.TeacherWalletRepository = teacherWalletBalanceRepository;
+    this.courseRepository = courseRepository;
+    this.trackRepository = trackRepository;
+    this.academicYearRepository = academicYearRepository;
+    this.gradeRepository = gradeRepository;
     this.s3 = s3Service;
   }
 
@@ -41,15 +60,30 @@ export class UserService {
     const stud = await this.userRepository.model
       .where({ id: userId })
       .select("id", "email", "name", "gender", "profilePicture")
+      .include("studentProfile", (stud) =>
+        stud.select("school", "parentPhone", "trackId", "gradeId"),
+      )
       .first();
-    return stud;
-  }
-  async getStudentProfile(userId: string) {
-    const stud = await this.userRepository.findOneJoined(
-      { id: userId, role: UserRole.STUDENT },
-      "studentProfile",
-    );
-    return stud;
+    const track = await this.trackRepository.model
+      .where({ id: stud?.studentProfile?.trackId })
+      .first();
+    const academicYear = await this.academicYearRepository.model
+      .where({
+        id: track?.academicYearId,
+      })
+      .first();
+    const grade = await this.gradeRepository.model
+      .where({
+        id: stud?.studentProfile?.gradeId,
+      })
+      .first();
+
+    return {
+      ...stud,
+      track: { ...track },
+      academicYear: { ...academicYear },
+      grade: { ...grade },
+    };
   }
 
   async updateStudentProfile(userId: string, data: any) {
@@ -80,7 +114,7 @@ export class UserService {
       }
     }
 
-    return this.getStudentProfile(userId);
+    return this.getProfile(userId);
   }
 
   async deleteStudentProfile(userId: string) {
@@ -109,17 +143,12 @@ export class UserService {
     if (!update) throw new badRequestException("update failed ");
     return user;
   }
-  async getTeachersAll(subjectId?: string, userId?: string) {
+  async getTeachersAll() {
     const teachers = await this.teacherRepository.model
-      .where({
-        ...(subjectId ? { subjectId } : {}),
-        ...(userId ? { userId } : {}),
-      })
-      .include("user", (user) => user.select("name", "profilePicture", "id"))
-      .include("subject")
-      .select("id", "bio", "experience", "qualifications")
+      .include("user", (user) => user.select("name", "profilePicture", "id", "DeletedAt"))
+      .select("bio", "experience", "qualifications")
       .all();
-    return teachers;
+    return (teachers as any[]).filter((teacher) => teacher.user && !teacher.user.DeletedAt);
   }
   async getTeacherDetails(userId: string) {
     const teacher = await this.teacherRepository.model
@@ -133,13 +162,21 @@ export class UserService {
     if (!teacher) {
       throw new badRequestException("Teacher not found");
     }
+    const courses = await this.courseRepository.findMany({
+      teacherId: teacher.id,
+    });
 
-    return teacher;
+    return { teacher, courses };
   }
   async getSubscribedTeachers(userId: string) {
-    const teachers = await this.subscriptionRepository.findMany({
-      studentId: userId,
-    });
+    const teachers = await this.subscriptionRepository.model
+      .where({
+        studentId: userId,
+      })
+      .include("teacher", (teacher) =>
+        teacher.select("name", "profilePicture", "id"),
+      )
+      .all();
 
     return teachers;
   }

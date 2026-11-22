@@ -1,3 +1,5 @@
 export const routes = {
-  createTeacher: "create-teacher",
+  createTeacher: "/create-teacher",
+  teachers: "/teachers",
+  teacher: "/teachers/:teacherId",
 };

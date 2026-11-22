@@ -1,13 +1,11 @@
 export const routes = {
   profile: "/profile",
-  studentProfile: "/student-profile",
   updateStudentProfile: "/student-profile",
   deleteStudentProfile: "/student-profile",
 
-  createTeacher: "/teacher-profile",
-  teacherProfile: "/teacher-profile",
   teachers: "/teachers",
+  myTeachers: "/myTeachers",
   teachersBySubject: "/teachers/:subjectId",
-  updateTeacherProfile: "/teacher-profile",
-  deleteTeacherProfile: "/teacher-profile",
+  teacherProfile: "/teacher/:id",
+  subscribeTeacher: "/subscribe/:teacherId",
 };

@@ -131,6 +131,9 @@ export class AuthService {
     if (!user) {
       throw new badRequestException("wrong credential ");
     }
+    if ((user as any).DeletedAt) {
+      throw new badRequestException("This account is inactive");
+    }
     const passMatch = await verifyHashService(
       password,
       user.password as string,

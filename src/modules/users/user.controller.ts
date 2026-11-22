@@ -8,10 +8,23 @@ import { UserRole } from "../../interfaces";
 
 const router = Router();
 
+router.post(
+  routes.subscribeTeacher,
+  auth(),
+  authorize([UserRole.STUDENT]),
+  async (req: Request, res: Response) => {
+    const data = await userService.subscribeWithTeacher(
+      req.user.id as string,
+      req.params.teacherId as string,
+    );
+    return successResult({ res, message: "subscription request created", data, statusCode: 201 });
+  },
+);
+
 router.get(
   routes.profile,
   auth(),
-  authorize([UserRole.STUDENT, UserRole.TEACHER]),
+  authorize([UserRole.STUDENT]),
   async (req: Request, res: Response, next: NextFunction) => {
     const data = await userService.getProfile(req.user.id as string);
     return successResult({
@@ -22,16 +35,15 @@ router.get(
     });
   },
 );
-
 router.get(
-  routes.studentProfile,
+  routes.teacherProfile,
   auth(),
   authorize([UserRole.STUDENT]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const data = await userService.getStudentProfile(req.user.id as string);
+    const data = await userService.getTeacherDetails(req.params.id as string);
     return successResult({
       res,
-      message: "student profile retrieved successfully",
+      message: "teacher profile retrieved successfully",
       data,
       statusCode: 200,
     });
@@ -39,14 +51,28 @@ router.get(
 );
 
 router.get(
-  routes.teacherProfile,
+  routes.myTeachers,
   auth(),
-  authorize([UserRole.TEACHER]),
+  authorize([UserRole.STUDENT]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const data = await userService.getTeacherDetails(req.user.id as string);
+    const data = await userService.getSubscribedTeachers(req.user.id as string);
+    console.log("🚀 ~ data:", data);
     return successResult({
       res,
-      message: "teacher profile retrieved successfully",
+      message: "your teachers retrieved successfully",
+      data,
+      statusCode: 200,
+    });
+  },
+);
+router.get(
+  routes.teachers,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const data = await userService.getTeachersAll();
+    console.log("🚀 ~ data:", data);
+    return successResult({
+      res,
+      message: "teachers retrieved successfully",
       data,
       statusCode: 200,
     });

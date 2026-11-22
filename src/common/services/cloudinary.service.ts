@@ -1,4 +1,4 @@
-import streamifier from 'streamifier';
+import streamifier from "streamifier";
 import { v2 as cloudinary, UploadApiOptions } from "cloudinary";
 
 import {
@@ -6,6 +6,7 @@ import {
   CLOUDINARY_API_SECRET,
   CLOUDINARY_CLOUD_NAME,
 } from "../../env/config";
+import { UploadApiResponse } from "cloudinary";
 
 interface UploadFileOptions {
   filePath: string;
@@ -56,23 +57,15 @@ export class CloudinaryService {
     buffer,
     folder,
     options = {},
-  }: UploadBufferOptions) => {
+  }: UploadBufferOptions): Promise<UploadApiResponse> => {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          ...options,
-        },
+        { folder, ...options },
         (error, result) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          resolve(result);
+          if (error) return reject(error);
+          resolve(result as UploadApiResponse);
         },
       );
-
       streamifier.createReadStream(buffer).pipe(uploadStream);
     });
   };

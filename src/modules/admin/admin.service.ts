@@ -1,10 +1,10 @@
+import { CloudinaryService } from "./../../common/services/cloudinary.service";
 import {
   badRequestException,
+  cloudinaryService,
   conflictException,
   encryptService,
   hashService,
-  s3Service,
-  S3Service,
 } from "../../common";
 import { UserRole } from "../../interfaces";
 import {
@@ -16,18 +16,20 @@ import {
   UserRepository,
 } from "../../repositories";
 import { createTeacherDTO } from "./admin.dto";
+import { UploadApiResponse } from "cloudinary";
+import { db } from "../../prisma/db";
 
 export class AdminService {
   private userRepository: UserRepository;
   private teacherRepository: TeacherProfileRepository;
   private subjectRepository: SubjectRepository;
-  private s3: S3Service;
+  private cloudinary: CloudinaryService;
 
   constructor() {
     this.userRepository = userRepository;
     this.teacherRepository = teacherProfileRepository;
     this.subjectRepository = subjectRepository;
-    this.s3 = s3Service;
+    this.cloudinary = cloudinaryService;
   }
   async createTeacher({
     name,
@@ -58,25 +60,30 @@ export class AdminService {
       phone: encryptedPhone,
     });
     if (!user) throw new conflictException("fail");
-    let profilePic!: string;
+    let profilePic!: UploadApiResponse;
     if (file) {
-      profilePic = await this.s3.uploadAsset({
-        file: file as Express.Multer.File,
-        path: `Users/${user.id}/profile`,
+      profilePic = await this.cloudinary.uploadBuffer({
+        buffer: file.buffer,
+        folder: `Users/${user.id}/profile`,
       });
-
       await this.userRepository.update({
         where: { id: user.id },
         update: {
-          profilePicture: profilePic,
+          profilePicture: profilePic.secure_url,
+          profilePicturePublic_id: profilePic.public_id,
         },
       });
     }
     const subject = await this.subjectRepository.findById(subjectId);
     if (!subject) throw new conflictException("fail to find subject");
 
+    const teaches = await db.orm.public.Teaches.create({
+      teacherId: user.id,
+      subjectId: subject.id,
+    });
+    if (!teaches) throw new conflictException("fail to teaches this subject");
+
     const teacher = await this.teacherRepository.create({
-      subjectId,
       bio: bio ?? null,
       experience: experience ?? null,
       qualifications: qualifications ?? null,
@@ -86,7 +93,6 @@ export class AdminService {
 
     if (!teacher) {
       await this.userRepository.deleteById(user.id);
-      await this.s3.deleteAsset({ Key: profilePic });
       throw new badRequestException("failed to create your account ");
     }
 
@@ -122,6 +128,12 @@ export class AdminService {
     const teacher = await this.teacherRepository.findById(teacherId);
     if (!teacher) throw new badRequestException("teacher not found");
 
+    if (data.email) {
+      const existing = await this.userRepository.findOne({ email: data.email });
+      if (existing && existing.id !== teacher.userId)
+        throw new badRequestException("email already exists");
+    }
+
     const userFields: any = {};
     if (data.name) userFields.name = data.name;
     if (data.email) userFields.email = data.email;
@@ -147,17 +159,39 @@ export class AdminService {
     const teacher = await this.teacherRepository.findById(teacherId);
     if (!teacher) throw new badRequestException("teacher not found");
 
-    // remove teacher profile
-    await this.teacherRepository.deleteById(teacherId);
+    await this.userRepository.updateById(teacher.userId, {
+      DeletedAt: new Date(),
+      changedCredentialsTime: Date.now(),
+    });
+    return { message: "teacher deactivated" };
+  }
 
-    // remove user and their profile picture if present
-    const user = await this.userRepository.findById(teacher.userId);
-    if (user && (user as any).profilePicture) {
-      await this.s3.deleteAsset({ Key: (user as any).profilePicture });
-    }
-    await this.userRepository.deleteById(teacher.userId);
-
-    return { message: "teacher deleted" };
+  async getTeachers() {
+    const [profiles, teaches, subjects] = await Promise.all([
+      this.teacherRepository.model
+        .include("user", (user) =>
+          user.select("id", "name", "email", "profilePicture", "DeletedAt"),
+        )
+        .all(),
+      (db.orm.public as any).Teaches.all(),
+      this.subjectRepository.model.all(),
+    ]);
+    const subjectById = new Map(
+      (subjects as any[]).map((subject) => [subject.id, subject]),
+    );
+    return (profiles as any[])
+      .filter((profile) => profile.user && !profile.user.DeletedAt)
+      .map((profile) => {
+        const teaching = (teaches as any[]).find(
+          (item) => item.teacherId === profile.userId,
+        );
+        return {
+          ...profile,
+          subject: teaching
+            ? (subjectById.get(teaching.subjectId) ?? null)
+            : null,
+        };
+      });
   }
 }
 

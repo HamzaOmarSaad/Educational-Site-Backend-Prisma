@@ -18,10 +18,12 @@ import {
   LessonRepository,
   subjectRepository,
   SubjectRepository,
+  teacherProfileRepository,
   userRepository,
   UserRepository,
 } from "../../repositories";
 import { createCourseDTO, createCourseSectionDTO } from "./course.dto";
+import { db } from "../../prisma/db";
 
 export class CourseService {
   private userRepository: UserRepository;
@@ -91,7 +93,7 @@ export class CourseService {
     let thumbnailUrl: string | null = null;
     if (file) {
       thumbnailUrl = await this.s3.uploadAsset({
-        file: file,
+        file: file as Express.Multer.File,
         path: `Course/${course.id}/thumbnail`,
       });
     }
@@ -124,7 +126,7 @@ export class CourseService {
 
     return section;
   }
-  async getCourse(teacherId: string, studentId: string) {
+  async getTeacherCourse(teacherId: string, studentId: string) {
     const stud = await this.userRepository.model
       .where({ id: studentId })
       .include("studentProfile")
@@ -136,6 +138,74 @@ export class CourseService {
     });
 
     return courses;
+  }
+  async getMyCourse(studentId: string) {
+    const enrollment = await this.enrollmentRepository.model
+      .where({
+        studentId,
+        status: "ACTIVE",
+      })
+      .include("course")
+      .all();
+
+    if (!enrollment) {
+      throw new badRequestException("You are not enrolled in this course");
+    }
+    return enrollment;
+  }
+  async getAllCourse() {
+    const courses = await this.courseRepository.model.all();
+    if (!courses) {
+      throw new badRequestException("You are not enrolled in this course");
+    }
+    return courses;
+  }
+  async getSubjects(year?: number) {
+    const currentYear = new Date().getMonth() >= 8
+      ? new Date().getFullYear() + 1
+      : new Date().getFullYear();
+    const catalogYear = year ?? currentYear;
+    const [subjects, tracks, academicYears, grades, courses] = await Promise.all([
+      this.subjectRepository.model.all(),
+      (db.orm.public as any).Track.all(),
+      (db.orm.public as any).AcademicYear.all(),
+      (db.orm.public as any).Grade.all(),
+      this.courseRepository.model.all(),
+    ]);
+    const trackById = new Map(tracks.map((track: any) => [track.id, track]));
+    const yearById = new Map(academicYears.map((academicYear: any) => [academicYear.id, academicYear]));
+    const gradeById = new Map(grades.map((grade: any) => [grade.id, grade]));
+    const courseCounts = new Map<string, number>();
+    for (const course of courses as any[]) {
+      courseCounts.set(course.subjectId, (courseCounts.get(course.subjectId) ?? 0) + 1);
+    }
+    return (subjects as any[]).flatMap((subject) => {
+      const track = trackById.get(subject.trackId) as any;
+      const academicYear = track && yearById.get(track.academicYearId) as any;
+      if (!track || !academicYear || academicYear.year !== catalogYear) return [];
+      return [{
+        ...subject,
+        track: { ...track, academicYear: { ...academicYear, grade: gradeById.get(academicYear.gradeId) ?? null } },
+        courseCount: courseCounts.get(subject.id) ?? 0,
+      }];
+    });
+  }
+  async getTeacherWorkspaceOptions(teacherId: string) {
+    const [subjects, courses, allGrades, allSections, allLessons, teacherProfile] = await Promise.all([
+      this.getSubjects(),
+      this.courseRepository.findMany({ teacherId }),
+      this.gradeRepository.findAll(),
+      this.courseSectionRepository.findAll(),
+      this.lessonRepository.findAll(),
+      teacherProfileRepository.findOne({ userId: teacherId }),
+    ]);
+    const courseIds = new Set((courses as any[]).map((course) => course.id));
+    const sections = (allSections as any[]).filter((section) => courseIds.has(section.courseId));
+    const sectionIds = new Set(sections.map((section: any) => section.id));
+    const lessons = (allLessons as any[]).filter((lesson) => sectionIds.has(lesson.sectionId));
+    const gradeIds = new Set((subjects as any[]).map((subject) => subject.track?.academicYear?.grade?.id).filter(Boolean));
+    const grades = (allGrades as any[]).filter((grade) => gradeIds.has(grade.id));
+    return { teacherProfileId: teacherProfile?.id ?? null, grades, subjects, courses, sections, lessons };
   }
   async watchCourse(courseId: string, studentId: string) {
     const enrollment = await this.enrollmentRepository.model
@@ -179,6 +249,7 @@ export class CourseService {
           })
           .include("video")
           .include("attachments")
+          .include("quizzes")
           .include("progress")
           .all();
 

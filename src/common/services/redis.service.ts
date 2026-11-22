@@ -10,32 +10,67 @@ type RedisOTPType = {
 };
 export class RedisService {
   private readonly redisClient: RedisClientType;
+
   constructor() {
     this.redisClient = createClient({
       url: REDIS_DB_URI,
       database: REDIS_DB_NAME,
+
+      socket: {
+        reconnectStrategy: (retries) => {
+          const delay = Math.min(retries * 500, 5000);
+
+          console.log(
+            `🔄 Redis reconnecting... attempt ${retries}, retrying in ${delay}ms`,
+          );
+
+          return delay;
+        },
+      },
     });
+
     this.handleEvents();
   }
-
   /**----------------connection ------------------------------ */
+
   public connectRedisDB = async () => {
     try {
+      if (this.redisClient.isOpen) {
+        console.log("⚠️ Redis is already connecting/connected");
+        return;
+      }
+
       await this.redisClient.connect();
+
       console.log("✅ Redis connected successfully");
     } catch (error) {
-      console.log("🚀 redis connectDB ~ error:", error);
+      console.error("❌ Redis connectDB error:", error);
     }
   };
 
   private handleEvents() {
-    this.redisClient.on("error", (error) => {
-      console.log("🚀  RedisService has error:", error);
+    this.redisClient.on("connect", () => {
+      console.log("🔌 Redis connecting...");
     });
+
     this.redisClient.on("ready", () => {
-      console.log("🚀 RedisService is ready");
+      console.log("✅ Redis is ready");
+    });
+
+    this.redisClient.on("reconnecting", () => {
+      console.log("🔄 Redis reconnecting...");
+    });
+
+    this.redisClient.on("error", (error) => {
+      console.error("❌ Redis error:", error);
+    });
+
+    this.redisClient.on("end", () => {
+      console.log("🔴 Redis connection closed");
     });
   }
+
+  /**----------------connection ------------------------------ */
 
   /**----------------------keys----------------------------------- */
   public FCMKey(userId: string) {

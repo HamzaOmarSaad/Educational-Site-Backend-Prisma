@@ -2,16 +2,21 @@ import type { Request } from "express";
 import multer from "multer";
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
+import { extname } from "node:path";
 import type { FileFilterCallback } from "multer";
 
 import { badRequestException } from "../res";
 import { storageApproachEnum } from "../../Enums/multer.enum";
 
 export const fileFieldValidation = {
-  image: ["image/png", "image/jpg", "image/jpeg"],
+  image: ["image/png", "image/jpg", "image/jpeg", "image/webp"],
 
-  video: ["video/mp4", "video/webm", "video/quicktime", "video/x-matroska"],
-  file: ["file/pdf ,file/pptx ,file/docx"],
+  video: ["video/mp4", "video/webm", "video/quicktime", "video/mkv", "video/matroska", "video/x-matroska", "application/x-matroska"],
+  file: [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation", // pptx
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
+  ],
 };
 
 export const fileFilter = (validation: string[]) => {
@@ -24,7 +29,11 @@ export const fileFilter = (validation: string[]) => {
       return cb(null, true);
     }
 
-    if (!validation.includes(file.mimetype)) {
+    const isMatroska = extname(file.originalname).toLowerCase() === ".mkv" &&
+      ["video/matroska", "video/x-matroska", "video/mkv", "application/x-matroska", "application/octet-stream"].includes(file.mimetype);
+    if (isMatroska) {
+      file.mimetype = "video/x-matroska";
+    } else if (!validation.includes(file.mimetype)) {
       return cb(
         new badRequestException(`Invalid file type: ${file.mimetype}`) as Error,
       );

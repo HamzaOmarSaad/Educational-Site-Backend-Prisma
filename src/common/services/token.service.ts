@@ -275,6 +275,9 @@ export class TokenService {
     if (!user) {
       throw new badRequestException("No user with these credentials ");
     }
+    if (user.DeletedAt) {
+      throw new badRequestException("This account is inactive");
+    }
 
     this.validateCredentials(user, verifiedData.iat);
     //!6)inject user info into request to be used in operations

@@ -43,6 +43,9 @@ router.post(
       req.body as ILoginDTO,
       `${req.protocol}://${req.host}`,
     );
+    if (!data.user || data.user.role !== UserRole.STUDENT) {
+      throw new badRequestException("invalid credentials for admin");
+    }
     return successResult({
       res,
       message: "user logged in successfully",
